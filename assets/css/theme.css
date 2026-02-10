@@ -130,6 +130,41 @@ html {
 	outline: none;
 }
 
+/* ─── Language switcher ─── */
+.reggio-lang-switcher {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	margin-left: 1rem;
+	padding-left: 1rem;
+	border-left: 1px solid var(--wp--preset--color--neutral);
+}
+
+.reggio-lang-link {
+	font-size: 0.8rem;
+	font-weight: 600;
+	text-decoration: none;
+	color: var(--wp--preset--color--neutral-dark);
+	padding: 0.2rem 0.4rem;
+	border-radius: 3px;
+	transition: all 0.2s ease;
+}
+
+.reggio-lang-link:hover {
+	color: var(--wp--preset--color--primary);
+	background-color: var(--wp--preset--color--neutral-light);
+}
+
+.reggio-lang-active {
+	color: var(--wp--preset--color--white) !important;
+	background-color: var(--wp--preset--color--primary) !important;
+}
+
+.reggio-lang-sep {
+	color: var(--wp--preset--color--neutral);
+	font-size: 0.7rem;
+}
+
 /* ─── Responsive adjustments ─── */
 @media (max-width: 781px) {
 	.wp-block-columns {

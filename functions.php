@@ -17,6 +17,9 @@ define( 'REGGIO_URI', get_template_directory_uri() );
  * Theme setup
  */
 function reggio_setup() {
+	// Load text domain for translations
+	load_theme_textdomain( 'reggio-hub', REGGIO_DIR . '/languages' );
+
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
 	add_theme_support( 'responsive-embeds' );
@@ -33,8 +36,8 @@ function reggio_setup() {
 	add_editor_style( 'assets/css/editor.css' );
 
 	register_nav_menus( array(
-		'primary'   => __( 'Menu Glowne', 'reggio-hub' ),
-		'footer'    => __( 'Menu Stopka', 'reggio-hub' ),
+		'primary'   => __( 'Primary Menu', 'reggio-hub' ),
+		'footer'    => __( 'Footer Menu', 'reggio-hub' ),
 	) );
 
 	add_image_size( 'reggio-card', 600, 400, true );
@@ -126,3 +129,57 @@ function reggio_excerpt_more( $more ) {
 	return '&hellip;';
 }
 add_filter( 'excerpt_more', 'reggio_excerpt_more' );
+
+/**
+ * Add hreflang tags for multilingual SEO
+ * Works with Polylang - outputs hreflang link tags in <head>
+ */
+function reggio_add_hreflang_tags() {
+	if ( ! function_exists( 'pll_the_languages' ) ) {
+		return;
+	}
+
+	$translations = pll_the_languages( array(
+		'raw'          => 1,
+		'hide_current' => 0,
+	) );
+
+	if ( empty( $translations ) ) {
+		return;
+	}
+
+	foreach ( $translations as $lang ) {
+		$locale = str_replace( '_', '-', $lang['locale'] );
+		printf(
+			'<link rel="alternate" hreflang="%s" href="%s" />' . "\n",
+			esc_attr( $locale ),
+			esc_url( $lang['url'] )
+		);
+	}
+
+	// x-default points to English version
+	if ( isset( $translations['en'] ) ) {
+		printf(
+			'<link rel="alternate" hreflang="x-default" href="%s" />' . "\n",
+			esc_url( $translations['en']['url'] )
+		);
+	}
+}
+add_action( 'wp_head', 'reggio_add_hreflang_tags' );
+
+/**
+ * Redirect root URL to default language
+ * Only if Polylang doesn't handle it already
+ */
+function reggio_root_redirect() {
+	if ( function_exists( 'pll_default_language' ) ) {
+		return; // Polylang handles redirects
+	}
+
+	// Fallback: if no multilingual plugin, redirect root to /en/
+	if ( $_SERVER['REQUEST_URI'] === '/' ) {
+		wp_redirect( home_url( '/en/' ), 301 );
+		exit;
+	}
+}
+add_action( 'template_redirect', 'reggio_root_redirect' );
