@@ -1,0 +1,47 @@
+<!-- wp:template-part {"slug":"header","area":"header"} /-->
+
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+
+	<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|20"}}},"layout":{"type":"constrained","contentSize":"800px"}} -->
+	<div class="wp-block-group" style="padding-top:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--20)">
+
+		<!-- wp:post-terms {"term":"category","style":{"typography":{"fontSize":"0.8rem","textTransform":"uppercase","letterSpacing":"0.1em","fontWeight":"600"}},"textColor":"accent"} /-->
+
+		<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"top":"var:preset|spacing|10"}}}} /-->
+
+		<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"},"style":{"spacing":{"margin":{"top":"var:preset|spacing|20"}}},"textColor":"neutral-dark"} -->
+		<div class="wp-block-group has-neutral-dark-color has-text-color" style="margin-top:var(--wp--preset--spacing--20)">
+			<!-- wp:post-author-name {"style":{"typography":{"fontSize":"0.9rem"}}} /-->
+			<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.9rem"}}} -->
+			<p style="font-size:0.9rem">&middot;</p>
+			<!-- /wp:paragraph -->
+			<!-- wp:post-date {"style":{"typography":{"fontSize":"0.9rem"}}} /-->
+		</div>
+		<!-- /wp:group -->
+
+	</div>
+	<!-- /wp:group -->
+
+	<!-- wp:post-featured-image {"align":"wide","style":{"border":{"radius":"8px"},"spacing":{"margin":{"bottom":"var:preset|spacing|40"}}}} /-->
+
+	<!-- wp:group {"style":{"spacing":{"padding":{"bottom":"var:preset|spacing|50"}}},"layout":{"type":"constrained","contentSize":"800px"}} -->
+	<div class="wp-block-group" style="padding-bottom:var(--wp--preset--spacing--50)">
+
+		<!-- wp:post-content {"layout":{"type":"constrained","contentSize":"800px"}} /-->
+
+		<!-- wp:separator {"backgroundColor":"neutral","style":{"spacing":{"margin":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}}} -->
+		<hr class="wp-block-separator has-text-color has-neutral-background-color has-background has-neutral-color" style="margin-top:var(--wp--preset--spacing--40);margin-bottom:var(--wp--preset--spacing--40)" />
+		<!-- /wp:separator -->
+
+		<!-- wp:post-terms {"term":"post_tag","prefix":"Tagi: ","style":{"typography":{"fontSize":"0.85rem"}},"textColor":"primary"} /-->
+
+	</div>
+	<!-- /wp:group -->
+
+	<!-- wp:pattern {"slug":"reggio-hub/newsletter-cta"} /-->
+
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","area":"footer"} /-->
