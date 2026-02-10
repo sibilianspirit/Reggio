@@ -1,158 +1,131 @@
-# ReggioCalabria.hub - Centrum Wiedzy o Regionie
+# BestOfCalabria.com - The Ultimate Calabria Guide
 
-## Wizja projektu
+## Project vision
 
-Serwis informacyjno-turystyczny o Reggio Calabria i prowincji - docelowo monetyzowany
-przez afiliacje, reklamy, treści sponsorowane i usługi lokalne.
-
----
-
-## Struktura serwisu
-
-### 1. Strona Glowna (`/`)
-- Hero z panoramą miasta i Cieśniną Mesyńską
-- Sekcja "Dlaczego Reggio Calabria?" (3-4 karty z USP)
-- Wyróżnione artykuły / aktualności
-- Newsletter signup (zbieranie bazy)
-- Szybkie linki do głównych sekcji
-
-### 2. Przewodnik turystyczny (`/turystyka/`)
-- `/turystyka/atrakcje/` - zabytki, muzea (Brązy z Riace, Museo Nazionale, Lungomare)
-- `/turystyka/plaze/` - plaże i wybrzeże (Costa Viola, Scilla, Capo Vaticano)
-- `/turystyka/szlaki/` - trekking, Aspromonte, szlaki górskie
-- `/turystyka/mapa/` - interaktywna mapa z POI
-
-### 3. Kultura i historia (`/kultura/`)
-- `/kultura/historia/` - od Magna Graecia po współczesność
-- `/kultura/tradycje/` - święta, festiwale (Festa della Madonna, Regata)
-- `/kultura/jezyk/` - dialekt calabrese, słowniczek
-- `/kultura/sztuka/` - rzemiosło, tkactwo, ceramika
-
-### 4. Kuchnia (`/kuchnia/`)
-- `/kuchnia/przepisy/` - lokalne przepisy (nduja, bergamotto, pesce spada)
-- `/kuchnia/produkty/` - lokalne produkty DOP/IGP
-- `/kuchnia/restauracje/` - przewodnik po restauracjach (afiliacja)
-- `/kuchnia/wino/` - wina Calabrii (Cirò, Greco di Bianco)
-
-### 5. Praktyczne informacje (`/praktyczne/`)
-- `/praktyczne/dojazd/` - loty, pociągi, promy, autobusy
-- `/praktyczne/noclegi/` - hotele, B&B, agriturismi (afiliacja Booking/Airbnb)
-- `/praktyczne/wynajem-aut/` - wypożyczalnie (afiliacja)
-- `/praktyczne/bezpieczenstwo/` - porady dla turystów
-- `/praktyczne/pogoda/` - klimat, kiedy jechać
-
-### 6. Blog / Aktualności (`/blog/`)
-- Artykuły tematyczne (SEO long-tail)
-- Relacje z podróży
-- Wywiady z lokalnymi ludźmi
-- Sezonowe przewodniki
-
-### 7. Okolice - prowincja (`/okolice/`)
-- `/okolice/scilla/` - Scilla i Chianalea
-- `/okolice/aspromonte/` - Park Narodowy Aspromonte
-- `/okolice/locri/` - Locri Epizefiri
-- `/okolice/tropea/` - Tropea i Costa degli Dei
-- `/okolice/stilo/` - Cattolica di Stilo, bizantyjskie dziedzictwo
-
-### 8. Strony statyczne
-- `/o-nas/` - o projekcie
-- `/kontakt/` - formularz kontaktowy
-- `/polityka-prywatnosci/`
-- `/wspolpraca/` - oferta dla partnerów, reklama
+Comprehensive knowledge hub about the Calabria region in southern Italy.
+Monetized through affiliates, ads, sponsored content and local services.
+Bilingual: EN (default) + PL.
 
 ---
 
-## Model monetyzacji
+## Site structure
 
-| Kanał | Opis | Priorytet |
-|-------|------|-----------|
-| **Afiliacja Booking/Airbnb** | Linki do noclegów | Wysoki |
-| **Afiliacja wynajem aut** | Discover Cars, Rentalcars | Wysoki |
-| **Google AdSense** | Reklamy display | Średni |
-| **Treści sponsorowane** | Artykuły od lokalnych biznesów | Średni |
-| **E-book / przewodnik PDF** | Płatny przewodnik do pobrania | Niski (faza 2) |
-| **Newsletter sponsorowany** | Reklama w mailingu | Niski (faza 2) |
-
----
-
-## Stack technologiczny (propozycja)
-
-| Warstwa | Technologia | Dlaczego |
-|---------|-------------|----------|
-| Framework | **Astro** | Szybki, statyczny, świetny SEO |
-| Styling | **Tailwind CSS** | Szybkie prototypowanie, responsywność |
-| CMS | **Markdown / MDX** | Proste zarządzanie treścią bez backendu |
-| Hosting | **Netlify / Vercel** | Darmowy tier, CDN, szybki deploy |
-| Analytics | **Plausible / Umami** | GDPR-friendly, lekkie |
-| Newsletter | **Mailerlite** | Darmowy do 1000 subskrybentów |
-
----
-
-## Struktura katalogów projektu
-
-```
-/
-├── src/
-│   ├── layouts/
-│   │   ├── BaseLayout.astro        # Główny layout
-│   │   ├── BlogLayout.astro        # Layout dla artykułów
-│   │   └── CategoryLayout.astro    # Layout dla kategorii
-│   ├── components/
-│   │   ├── Header.astro
-│   │   ├── Footer.astro
-│   │   ├── Hero.astro
-│   │   ├── Navigation.astro
-│   │   ├── Card.astro
-│   │   ├── Newsletter.astro
-│   │   ├── Map.astro
-│   │   └── SEO.astro
-│   ├── pages/
-│   │   ├── index.astro
-│   │   ├── turystyka/
-│   │   ├── kultura/
-│   │   ├── kuchnia/
-│   │   ├── praktyczne/
-│   │   ├── blog/
-│   │   ├── okolice/
-│   │   └── [...slug].astro
-│   ├── content/                     # Treści w Markdown/MDX
-│   │   ├── blog/
-│   │   ├── turystyka/
-│   │   ├── kultura/
-│   │   ├── kuchnia/
-│   │   ├── praktyczne/
-│   │   └── okolice/
-│   └── styles/
-│       └── global.css
-├── public/
-│   ├── images/
-│   ├── fonts/
-│   └── favicon.svg
-├── astro.config.mjs
-├── tailwind.config.mjs
-└── package.json
-```
-
----
-
-## Fazy rozwoju
-
-### Faza 1 - MVP
-- Strona główna
-- 2-3 artykuły w każdej sekcji
-- Podstawowe SEO (meta, OG, sitemap)
+### 1. Homepage (`/`)
+- Hero with Calabrian coast panorama
+- "Why Calabria?" section (3-4 USP cards)
+- Featured destinations grid
+- Latest articles
 - Newsletter signup
-- Responsywny design
+- Quick links to main sections
 
-### Faza 2 - Wzrost
-- 20+ artykułów
-- Interaktywna mapa
-- Integracja afiliacji (Booking, wynajem aut)
+### 2. Destinations (`/destinations/`)
+Main hub for all cities and places:
+- `/destinations/reggio-calabria/` - capital, Bronzi di Riace, Museo Nazionale, Lungomare
+- `/destinations/tropea/` - cliff-top town, beaches, Santa Maria dell'Isola
+- `/destinations/scilla/` - Chianalea fishing village, castle, Strait of Messina
+- `/destinations/pizzo/` - tartufo gelato, Piedigrotta church, historic center
+- `/destinations/bova/` - Greek-Calabrian village, Grecanico heritage
+- `/destinations/gerace/` - Norman cathedral, medieval town
+- `/destinations/stilo/` - Cattolica di Stilo, Byzantine heritage
+- `/destinations/locri/` - Locri Epizefiri archaeological site
+- `/destinations/cosenza/` - old town, Telesio theater, MAB museum
+- `/destinations/catanzaro/` - regional capital, belvedere views
+
+### 3. Nature & Outdoors (`/nature/`)
+- `/nature/aspromonte/` - Aspromonte National Park, trekking, waterfalls
+- `/nature/sila/` - Sila National Park, lakes, forests
+- `/nature/pollino/` - Pollino National Park (shared with Basilicata)
+- `/nature/costa-viola/` - Costa Viola coastline
+- `/nature/capo-vaticano/` - beaches, grottos, diving
+- `/nature/beaches/` - best beaches guide
+
+### 4. Cuisine (`/cuisine/`)
+- `/cuisine/recipes/` - nduja, bergamotto, pesce spada, fileja
+- `/cuisine/products/` - DOP/IGP local products
+- `/cuisine/restaurants/` - restaurant guide (affiliate)
+- `/cuisine/wine/` - Calabrian wines (Ciro, Greco di Bianco, Gaglioppo)
+- `/cuisine/street-food/` - tartufo di Pizzo, grattachecca, zeppole
+
+### 5. Culture & History (`/culture/`)
+- `/culture/history/` - from Magna Graecia to modern times
+- `/culture/traditions/` - festivals (Festa della Madonna, Varia di Palmi)
+- `/culture/language/` - Calabrese dialect, Grecanico in Bova
+- `/culture/art/` - crafts, weaving, ceramics, Codex Purpureus
+
+### 6. Practical Info (`/practical/`)
+- `/practical/getting-there/` - flights, trains, ferries (Lamezia, Reggio airports)
+- `/practical/accommodation/` - hotels, B&B, agriturismi (Booking/Airbnb affiliate)
+- `/practical/car-rental/` - rental guide (affiliate)
+- `/practical/safety/` - tips for tourists
+- `/practical/weather/` - climate, best time to visit
+- `/practical/itineraries/` - 3-day, 7-day, 14-day itineraries
+
+### 7. Blog (`/blog/`)
+- Long-tail SEO articles
+- Travel stories
+- Interviews with locals
+- Seasonal guides
+- "Hidden gems" series
+
+### 8. Static pages
+- `/about/` - about the project
+- `/contact/` - contact form
+- `/privacy-policy/`
+- `/partnership/` - advertising, sponsored content offer
+
+---
+
+## Monetization model
+
+| Channel | Description | Priority |
+|---------|-------------|----------|
+| **Booking/Airbnb affiliate** | Accommodation links per destination | High |
+| **Car rental affiliate** | Discover Cars, Rentalcars | High |
+| **Google AdSense** | Display ads | Medium |
+| **Sponsored content** | Articles from local businesses | Medium |
+| **GetYourGuide/Viator** | Tour & activity bookings | Medium |
+| **E-book / PDF guide** | Paid downloadable guide | Low (phase 2) |
+| **Sponsored newsletter** | Ads in mailing | Low (phase 2) |
+
+---
+
+## Tech stack
+
+| Layer | Technology | Why |
+|-------|------------|-----|
+| CMS | **WordPress 6.4+** | Easy content management, plugin ecosystem |
+| Theme | **Custom block theme (FSE)** | Full control, modern editing |
+| Multilingual | **Polylang** | Free, /en/ + /pl/ subdirectories |
+| SEO | **Yoast SEO / RankMath** | Sitemap, schema, meta tags |
+| Analytics | **Plausible / Umami** | GDPR-friendly, lightweight |
+| Newsletter | **MailerLite** | Free up to 1000 subscribers |
+| Hosting | **Shared hosting + DirectAdmin** | Current setup |
+
+---
+
+## Development phases
+
+### Phase 1 - MVP
+- Homepage with hero, destination grid, latest posts
+- 5-6 destination pages (Reggio, Tropea, Scilla, Pizzo, Bova, Aspromonte)
+- Basic cuisine & practical sections
+- Newsletter signup
+- EN + PL bilingual
+- Responsive design
+- Basic SEO (meta, OG, sitemap, hreflang)
+
+### Phase 2 - Growth
+- 30+ articles across all sections
+- All destination pages complete
+- Itinerary guides (3/7/14 days)
+- Affiliate integration (Booking, car rental, GetYourGuide)
 - Google AdSense
-- Blog regularny (2-4 posty/miesiąc)
+- Regular blog (2-4 posts/month)
+- Interactive map
 
-### Faza 3 - Monetyzacja pełna
-- E-book / płatny przewodnik
-- Treści sponsorowane
-- Współpraca z lokalnymi biznesami
-- Wersja wielojęzyczna (PL, EN, IT)
+### Phase 3 - Full monetization
+- E-book / paid guide
+- Sponsored content partnerships
+- Local business directory
+- Italian version (/it/)
+- Social media integration

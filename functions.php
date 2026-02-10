@@ -1,24 +1,23 @@
 <?php
 /**
- * Reggio Calabria Hub - Theme Functions
+ * Best of Calabria - Theme Functions
  *
- * @package ReggioHub
+ * @package BestOfCalabria
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'REGGIO_VERSION', '1.0.0' );
-define( 'REGGIO_DIR', get_template_directory() );
-define( 'REGGIO_URI', get_template_directory_uri() );
+define( 'BOC_VERSION', '2.0.0' );
+define( 'BOC_DIR', get_template_directory() );
+define( 'BOC_URI', get_template_directory_uri() );
 
 /**
  * Theme setup
  */
-function reggio_setup() {
-	// Load text domain for translations
-	load_theme_textdomain( 'reggio-hub', REGGIO_DIR . '/languages' );
+function boc_setup() {
+	load_theme_textdomain( 'best-of-calabria', BOC_DIR . '/languages' );
 
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
@@ -36,105 +35,109 @@ function reggio_setup() {
 	add_editor_style( 'assets/css/editor.css' );
 
 	register_nav_menus( array(
-		'primary'   => __( 'Primary Menu', 'reggio-hub' ),
-		'footer'    => __( 'Footer Menu', 'reggio-hub' ),
+		'primary' => __( 'Primary Menu', 'best-of-calabria' ),
+		'footer'  => __( 'Footer Menu', 'best-of-calabria' ),
 	) );
 
-	add_image_size( 'reggio-card', 600, 400, true );
-	add_image_size( 'reggio-hero', 1920, 800, true );
-	add_image_size( 'reggio-thumbnail', 300, 200, true );
+	add_image_size( 'boc-card', 600, 400, true );
+	add_image_size( 'boc-hero', 1920, 800, true );
+	add_image_size( 'boc-thumbnail', 300, 200, true );
+	add_image_size( 'boc-destination', 800, 600, true );
 }
-add_action( 'after_setup_theme', 'reggio_setup' );
+add_action( 'after_setup_theme', 'boc_setup' );
 
 /**
  * Enqueue styles
  */
-function reggio_enqueue_assets() {
+function boc_enqueue_assets() {
 	wp_enqueue_style(
-		'reggio-style',
+		'boc-style',
 		get_stylesheet_uri(),
 		array(),
-		REGGIO_VERSION
+		BOC_VERSION
 	);
 
 	wp_enqueue_style(
-		'reggio-theme',
-		REGGIO_URI . '/assets/css/theme.css',
+		'boc-theme',
+		BOC_URI . '/assets/css/theme.css',
 		array(),
-		REGGIO_VERSION
+		BOC_VERSION
 	);
 }
-add_action( 'wp_enqueue_scripts', 'reggio_enqueue_assets' );
+add_action( 'wp_enqueue_scripts', 'boc_enqueue_assets' );
 
 /**
  * Register block pattern categories
  */
-function reggio_register_pattern_categories() {
-	register_block_pattern_category( 'reggio-hero', array(
-		'label' => __( 'Reggio - Hero', 'reggio-hub' ),
+function boc_register_pattern_categories() {
+	register_block_pattern_category( 'boc-hero', array(
+		'label' => __( 'Best of Calabria - Hero', 'best-of-calabria' ),
 	) );
 
-	register_block_pattern_category( 'reggio-cards', array(
-		'label' => __( 'Reggio - Cards', 'reggio-hub' ),
+	register_block_pattern_category( 'boc-cards', array(
+		'label' => __( 'Best of Calabria - Cards', 'best-of-calabria' ),
 	) );
 
-	register_block_pattern_category( 'reggio-cta', array(
-		'label' => __( 'Reggio - Call to Action', 'reggio-hub' ),
+	register_block_pattern_category( 'boc-cta', array(
+		'label' => __( 'Best of Calabria - Call to Action', 'best-of-calabria' ),
 	) );
 
-	register_block_pattern_category( 'reggio-content', array(
-		'label' => __( 'Reggio - Content', 'reggio-hub' ),
+	register_block_pattern_category( 'boc-content', array(
+		'label' => __( 'Best of Calabria - Content', 'best-of-calabria' ),
+	) );
+
+	register_block_pattern_category( 'boc-destinations', array(
+		'label' => __( 'Best of Calabria - Destinations', 'best-of-calabria' ),
 	) );
 }
-add_action( 'init', 'reggio_register_pattern_categories' );
+add_action( 'init', 'boc_register_pattern_categories' );
 
 /**
  * Register custom block styles
  */
-function reggio_register_block_styles() {
+function boc_register_block_styles() {
 	register_block_style( 'core/group', array(
-		'name'  => 'reggio-card',
-		'label' => __( 'Card', 'reggio-hub' ),
+		'name'  => 'boc-card',
+		'label' => __( 'Card', 'best-of-calabria' ),
 	) );
 
 	register_block_style( 'core/group', array(
-		'name'  => 'reggio-card-hover',
-		'label' => __( 'Card with Hover', 'reggio-hub' ),
+		'name'  => 'boc-card-hover',
+		'label' => __( 'Card with Hover', 'best-of-calabria' ),
 	) );
 
 	register_block_style( 'core/image', array(
-		'name'  => 'reggio-rounded',
-		'label' => __( 'Rounded', 'reggio-hub' ),
+		'name'  => 'boc-rounded',
+		'label' => __( 'Rounded', 'best-of-calabria' ),
 	) );
 
 	register_block_style( 'core/separator', array(
-		'name'  => 'reggio-ornament',
-		'label' => __( 'Ornament', 'reggio-hub' ),
+		'name'  => 'boc-ornament',
+		'label' => __( 'Ornament', 'best-of-calabria' ),
 	) );
 }
-add_action( 'init', 'reggio_register_block_styles' );
+add_action( 'init', 'boc_register_block_styles' );
 
 /**
  * Custom excerpt length
  */
-function reggio_excerpt_length( $length ) {
+function boc_excerpt_length( $length ) {
 	return 25;
 }
-add_filter( 'excerpt_length', 'reggio_excerpt_length' );
+add_filter( 'excerpt_length', 'boc_excerpt_length' );
 
 /**
  * Custom excerpt more
  */
-function reggio_excerpt_more( $more ) {
+function boc_excerpt_more( $more ) {
 	return '&hellip;';
 }
-add_filter( 'excerpt_more', 'reggio_excerpt_more' );
+add_filter( 'excerpt_more', 'boc_excerpt_more' );
 
 /**
  * Add hreflang tags for multilingual SEO
- * Works with Polylang - outputs hreflang link tags in <head>
  */
-function reggio_add_hreflang_tags() {
+function boc_add_hreflang_tags() {
 	if ( ! function_exists( 'pll_the_languages' ) ) {
 		return;
 	}
@@ -157,7 +160,6 @@ function reggio_add_hreflang_tags() {
 		);
 	}
 
-	// x-default points to English version
 	if ( isset( $translations['en'] ) ) {
 		printf(
 			'<link rel="alternate" hreflang="x-default" href="%s" />' . "\n",
@@ -165,21 +167,19 @@ function reggio_add_hreflang_tags() {
 		);
 	}
 }
-add_action( 'wp_head', 'reggio_add_hreflang_tags' );
+add_action( 'wp_head', 'boc_add_hreflang_tags' );
 
 /**
  * Redirect root URL to default language
- * Only if Polylang doesn't handle it already
  */
-function reggio_root_redirect() {
+function boc_root_redirect() {
 	if ( function_exists( 'pll_default_language' ) ) {
-		return; // Polylang handles redirects
+		return;
 	}
 
-	// Fallback: if no multilingual plugin, redirect root to /en/
 	if ( $_SERVER['REQUEST_URI'] === '/' ) {
 		wp_redirect( home_url( '/en/' ), 301 );
 		exit;
 	}
 }
-add_action( 'template_redirect', 'reggio_root_redirect' );
+add_action( 'template_redirect', 'boc_root_redirect' );

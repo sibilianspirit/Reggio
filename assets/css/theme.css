@@ -1,6 +1,5 @@
 /**
- * Reggio Calabria Hub - Theme Styles
- * Custom styles beyond what theme.json provides
+ * Best of Calabria - Theme Styles
  */
 
 /* ─── Smooth scrolling ─── */
@@ -9,35 +8,35 @@ html {
 }
 
 /* ─── Card style ─── */
-.is-style-reggio-card {
+.is-style-boc-card {
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 	transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
-.is-style-reggio-card-hover {
+.is-style-boc-card-hover {
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 	transition: box-shadow 0.3s ease, transform 0.3s ease;
 	overflow: hidden;
 }
 
-.is-style-reggio-card-hover:hover {
+.is-style-boc-card-hover:hover {
 	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 	transform: translateY(-4px);
 }
 
 /* ─── Rounded image style ─── */
-.is-style-reggio-rounded img {
+.is-style-boc-rounded img {
 	border-radius: 12px;
 }
 
 /* ─── Ornament separator ─── */
-.is-style-reggio-ornament {
+.is-style-boc-ornament {
 	border: none !important;
 	background: none !important;
 	text-align: center;
 }
 
-.is-style-reggio-ornament::before {
+.is-style-boc-ornament::before {
 	content: "◆ ◆ ◆";
 	color: var(--wp--preset--color--secondary);
 	font-size: 0.75rem;
@@ -61,15 +60,15 @@ html {
 }
 
 /* ─── Featured image hover on cards ─── */
-.is-style-reggio-card-hover .wp-block-post-featured-image img {
+.is-style-boc-card-hover .wp-block-post-featured-image img {
 	transition: transform 0.4s ease;
 }
 
-.is-style-reggio-card-hover:hover .wp-block-post-featured-image img {
+.is-style-boc-card-hover:hover .wp-block-post-featured-image img {
 	transform: scale(1.05);
 }
 
-.is-style-reggio-card-hover .wp-block-post-featured-image {
+.is-style-boc-card-hover .wp-block-post-featured-image {
 	overflow: hidden;
 }
 
@@ -131,7 +130,7 @@ html {
 }
 
 /* ─── Language switcher ─── */
-.reggio-lang-switcher {
+.boc-lang-switcher {
 	display: flex;
 	align-items: center;
 	gap: 0.25rem;
@@ -140,7 +139,7 @@ html {
 	border-left: 1px solid var(--wp--preset--color--neutral);
 }
 
-.reggio-lang-link {
+.boc-lang-link {
 	font-size: 0.8rem;
 	font-weight: 600;
 	text-decoration: none;
@@ -150,19 +149,34 @@ html {
 	transition: all 0.2s ease;
 }
 
-.reggio-lang-link:hover {
+.boc-lang-link:hover {
 	color: var(--wp--preset--color--primary);
 	background-color: var(--wp--preset--color--neutral-light);
 }
 
-.reggio-lang-active {
+.boc-lang-active {
 	color: var(--wp--preset--color--white) !important;
 	background-color: var(--wp--preset--color--primary) !important;
 }
 
-.reggio-lang-sep {
+.boc-lang-sep {
 	color: var(--wp--preset--color--neutral);
 	font-size: 0.7rem;
+}
+
+/* ─── Destination card overlay ─── */
+.boc-destination-card {
+	position: relative;
+	overflow: hidden;
+	border-radius: 12px;
+}
+
+.boc-destination-card img {
+	transition: transform 0.4s ease;
+}
+
+.boc-destination-card:hover img {
+	transform: scale(1.08);
 }
 
 /* ─── Responsive adjustments ─── */

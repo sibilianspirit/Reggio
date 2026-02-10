@@ -1,20 +1,19 @@
 /**
- * Reggio Calabria Hub - Editor Styles
- * Styles applied within the block editor for WYSIWYG experience
+ * Best of Calabria - Editor Styles
  */
 
-.is-style-reggio-card,
-.is-style-reggio-card-hover {
+.is-style-boc-card,
+.is-style-boc-card-hover {
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.is-style-reggio-ornament {
+.is-style-boc-ornament {
 	border: none !important;
 	background: none !important;
 	text-align: center;
 }
 
-.is-style-reggio-ornament::before {
+.is-style-boc-ornament::before {
 	content: "◆ ◆ ◆";
 	color: var(--wp--preset--color--secondary);
 	font-size: 0.75rem;
