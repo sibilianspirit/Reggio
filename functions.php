@@ -170,16 +170,13 @@ function boc_add_hreflang_tags() {
 add_action( 'wp_head', 'boc_add_hreflang_tags' );
 
 /**
- * Redirect root URL to default language
+ * Polylang configuration: EN at root, PL in /pl/ subdirectory.
+ * In Polylang settings set:
+ *   - Default language: English
+ *   - URL modification: "The language is set from the directory name in pretty permalinks"
+ *   - Hide URL language info for default language: YES
+ *
+ * This gives:
+ *   EN: bestofcalabria.com/destinations/
+ *   PL: bestofcalabria.com/pl/destinations/
  */
-function boc_root_redirect() {
-	if ( function_exists( 'pll_default_language' ) ) {
-		return;
-	}
-
-	if ( $_SERVER['REQUEST_URI'] === '/' ) {
-		wp_redirect( home_url( '/en/' ), 301 );
-		exit;
-	}
-}
-add_action( 'template_redirect', 'boc_root_redirect' );

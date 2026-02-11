@@ -31,7 +31,7 @@ if ( function_exists( 'pll_the_languages' ) ) {
 	}
 } else {
 	echo '<div class="boc-lang-switcher">';
-	echo '<a href="/en/" class="boc-lang-link" hreflang="en">EN</a>';
+	echo '<a href="/" class="boc-lang-link" hreflang="en">EN</a>';
 	echo '<span class="boc-lang-sep">|</span>';
 	echo '<a href="/pl/" class="boc-lang-link" hreflang="pl">PL</a>';
 	echo '</div>';
