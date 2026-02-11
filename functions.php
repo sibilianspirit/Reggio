@@ -51,6 +51,13 @@ add_action( 'after_setup_theme', 'boc_setup' );
  */
 function boc_enqueue_assets() {
 	wp_enqueue_style(
+		'boc-google-fonts',
+		'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300..800&display=swap',
+		array(),
+		null
+	);
+
+	wp_enqueue_style(
 		'boc-style',
 		get_stylesheet_uri(),
 		array(),
@@ -60,7 +67,7 @@ function boc_enqueue_assets() {
 	wp_enqueue_style(
 		'boc-theme',
 		BOC_URI . '/assets/css/theme.css',
-		array(),
+		array( 'boc-google-fonts' ),
 		BOC_VERSION
 	);
 }

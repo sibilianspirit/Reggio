@@ -1,31 +1,17 @@
 <?php
 /**
  * Plugin Name: Best of Calabria - Content Importer
- * Description: One-click import of all pages, categories, and sample posts. Go to Tools > BOC Import to run.
- * Version: 1.0.0
+ * Description: Import all pages, categories and sample posts. Tools > BOC Import.
+ * Version: 2.0.0
  * Author: SibilianSpirit
- *
- * INSTRUCTIONS:
- * 1. Copy this file to wp-content/plugins/
- * 2. Activate the plugin in WP Admin > Plugins
- * 3. Go to Tools > BOC Import
- * 4. Click "Import Content"
- * 5. Deactivate and delete the plugin when done
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Add menu item under Tools
 add_action( 'admin_menu', function () {
-	add_management_page(
-		'BOC Content Importer',
-		'BOC Import',
-		'manage_options',
-		'boc-import',
-		'boc_import_page'
-	);
+	add_management_page( 'BOC Import', 'BOC Import', 'manage_options', 'boc-import', 'boc_import_page' );
 } );
 
 function boc_import_page() {
@@ -33,569 +19,374 @@ function boc_import_page() {
 		wp_die( 'Unauthorized' );
 	}
 
-	echo '<div class="wrap">';
-	echo '<h1>Best of Calabria - Content Importer</h1>';
+	echo '<div class="wrap"><h1>Best of Calabria - Content Importer</h1>';
 
-	// Handle form submission
-	if ( isset( $_POST['boc_run_import'] ) && check_admin_referer( 'boc_import_nonce' ) ) {
-		boc_run_import();
-		echo '<div class="notice notice-success"><p><strong>Import complete!</strong> You can now deactivate and delete this plugin.</p></div>';
-		echo '<p><a href="' . admin_url( 'plugins.php' ) . '" class="button">Go to Plugins</a></p>';
-	} else {
-		if ( false ) {
-			// Allow re-running
-		} else {
-			echo '<p>This will create:</p>';
-			echo '<ul style="list-style:disc;margin-left:20px">';
-			echo '<li><strong>40+ pages</strong> — Destinations, Nature, Cuisine, Culture, Practical + subpages</li>';
-			echo '<li><strong>6 categories</strong> — Destinations, Nature, Cuisine, Culture, Practical, Hidden Gems</li>';
-			echo '<li><strong>4 draft posts</strong> — Sample articles ready to edit and publish</li>';
-			echo '<li><strong>Settings</strong> — Site title, tagline, static homepage, permalinks</li>';
-			echo '</ul>';
-			echo '<form method="post" style="margin-top:20px">';
-			wp_nonce_field( 'boc_import_nonce' );
-			echo '<input type="hidden" name="boc_run_import" value="1" />';
-			submit_button( 'Import Content', 'primary', 'submit', false );
-			echo '</form>';
-		}
+	if ( isset( $_POST['boc_reset'] ) && check_admin_referer( 'boc_nonce' ) ) {
+		boc_reset_content();
+		echo '<div class="notice notice-warning"><p>All content deleted.</p></div>';
 	}
 
-	echo '</div>';
+	if ( isset( $_POST['boc_import'] ) && check_admin_referer( 'boc_nonce' ) ) {
+		boc_run_import();
+		echo '<div class="notice notice-success"><p><strong>Import complete!</strong></p></div>';
+	}
+
+	echo '<form method="post" style="margin:20px 0">';
+	wp_nonce_field( 'boc_nonce' );
+	echo '<h2>Step 1: Reset (optional)</h2>';
+	echo '<p>Deletes ALL pages, posts, and categories. Use this to start fresh.</p>';
+	echo '<button type="submit" name="boc_reset" value="1" class="button" onclick="return confirm(\'Delete ALL content? This cannot be undone.\')">Reset All Content</button>';
+	echo '<h2 style="margin-top:30px">Step 2: Import</h2>';
+	echo '<p>Creates all pages, categories, sample posts, and configures settings.</p>';
+	echo '<button type="submit" name="boc_import" value="1" class="button button-primary">Import Content</button>';
+	echo '</form></div>';
+}
+
+function boc_reset_content() {
+	echo '<pre>';
+	$pages = get_posts( array( 'post_type' => 'page', 'numberposts' => -1, 'post_status' => 'any' ) );
+	foreach ( $pages as $p ) {
+		wp_delete_post( $p->ID, true );
+		echo "Deleted page: {$p->post_title}\n";
+	}
+	$posts = get_posts( array( 'post_type' => 'post', 'numberposts' => -1, 'post_status' => 'any' ) );
+	foreach ( $posts as $p ) {
+		wp_delete_post( $p->ID, true );
+		echo "Deleted post: {$p->post_title}\n";
+	}
+	$cats = get_categories( array( 'hide_empty' => false ) );
+	foreach ( $cats as $c ) {
+		if ( $c->slug !== 'uncategorized' ) {
+			wp_delete_term( $c->term_id, 'category' );
+			echo "Deleted category: {$c->name}\n";
+		}
+	}
+	delete_option( 'boc_content_imported' );
+	echo "Done.\n</pre>";
 }
 
 function boc_run_import() {
-	echo '<pre style="background:#f0f0f0;padding:15px;max-height:500px;overflow:auto">';
+	echo '<pre style="background:#f5f5f5;padding:15px;max-height:400px;overflow:auto">';
 
 	// ─── Helpers ───
-	$create_page = function ( $title, $slug, $content = '', $parent_id = 0, $template = '' ) {
-		$existing = get_page_by_path( $slug );
-		if ( $existing ) {
-			echo "✓ Page exists: {$slug}\n";
-			return $existing->ID;
-		}
-
-		$args = array(
-			'post_title'   => $title,
-			'post_name'    => $slug,
-			'post_content' => $content,
-			'post_status'  => 'publish',
-			'post_type'    => 'page',
-			'post_parent'  => $parent_id,
-		);
-
-		if ( $template ) {
-			$args['page_template'] = $template;
-		}
-
-		$id = wp_insert_post( $args );
-		if ( is_wp_error( $id ) ) {
-			echo "ERROR: {$slug} — " . $id->get_error_message() . "\n";
-			return 0;
-		}
-
-		if ( $template ) {
-			update_post_meta( $id, '_wp_page_template', $template );
-		}
-
-		echo "+ Created page: {$title} (/{$slug}/)\n";
+	$mk_page = function ( $title, $slug, $content = '', $parent = 0, $tpl = '' ) {
+		$exists = get_page_by_path( $slug );
+		if ( $exists ) { echo "= {$slug}\n"; return $exists->ID; }
+		$a = array( 'post_title' => $title, 'post_name' => $slug, 'post_content' => $content,
+			'post_status' => 'publish', 'post_type' => 'page', 'post_parent' => $parent );
+		if ( $tpl ) { $a['page_template'] = $tpl; }
+		$id = wp_insert_post( $a );
+		if ( is_wp_error( $id ) ) { echo "! {$slug}\n"; return 0; }
+		if ( $tpl ) { update_post_meta( $id, '_wp_page_template', $tpl ); }
+		echo "+ {$title}\n";
 		return $id;
 	};
 
-	$create_cat = function ( $name, $slug, $description = '', $parent_id = 0 ) {
-		$existing = get_term_by( 'slug', $slug, 'category' );
-		if ( $existing ) {
-			echo "✓ Category exists: {$slug}\n";
-			return $existing->term_id;
-		}
-
-		$result = wp_insert_term( $name, 'category', array(
-			'slug'        => $slug,
-			'description' => $description,
-			'parent'      => $parent_id,
-		) );
-
-		if ( is_wp_error( $result ) ) {
-			echo "ERROR: category {$slug} — " . $result->get_error_message() . "\n";
-			return 0;
-		}
-
-		echo "+ Created category: {$name}\n";
-		return $result['term_id'];
+	$mk_cat = function ( $name, $slug, $desc = '' ) {
+		$e = get_term_by( 'slug', $slug, 'category' );
+		if ( $e ) return $e->term_id;
+		$r = wp_insert_term( $name, 'category', array( 'slug' => $slug, 'description' => $desc ) );
+		if ( is_wp_error( $r ) ) return 0;
+		echo "+ cat: {$name}\n";
+		return $r['term_id'];
 	};
 
-	$create_post = function ( $title, $slug, $content, $category_ids = array() ) {
-		$existing = get_page_by_path( $slug, OBJECT, 'post' );
-		if ( $existing ) {
-			echo "✓ Post exists: {$slug}\n";
-			return $existing->ID;
-		}
-
-		$id = wp_insert_post( array(
-			'post_title'    => $title,
-			'post_name'     => $slug,
-			'post_content'  => $content,
-			'post_status'   => 'draft',
-			'post_type'     => 'post',
-			'post_category' => $category_ids,
-		) );
-
-		if ( is_wp_error( $id ) ) {
-			echo "ERROR: post {$slug} — " . $id->get_error_message() . "\n";
-			return 0;
-		}
-
-		echo "+ Draft post: {$title}\n";
+	$mk_post = function ( $title, $slug, $content, $cats = array() ) {
+		$e = get_page_by_path( $slug, OBJECT, 'post' );
+		if ( $e ) return $e->ID;
+		$id = wp_insert_post( array( 'post_title' => $title, 'post_name' => $slug,
+			'post_content' => $content, 'post_status' => 'draft', 'post_type' => 'post',
+			'post_category' => $cats ) );
+		echo "+ draft: {$title}\n";
 		return $id;
 	};
 
-	// ═══ PAGES ═══
-	echo "=== CREATING PAGES ===\n\n";
+	// ═══ EN PAGES ═══
+	echo "--- EN PAGES ---\n";
 
-	$home_content = '<!-- wp:pattern {"slug":"best-of-calabria/hero-home"} /-->
+	$home = $mk_page( 'Home', 'home', '<!-- wp:pattern {"slug":"best-of-calabria/hero-home"} /-->
 <!-- wp:pattern {"slug":"best-of-calabria/section-categories"} /-->
 <!-- wp:pattern {"slug":"best-of-calabria/featured-destinations"} /-->
-<!-- wp:pattern {"slug":"best-of-calabria/newsletter-cta"} /-->';
+<!-- wp:pattern {"slug":"best-of-calabria/newsletter-cta"} /-->', 0, 'page-landing.html' );
 
-	$home_id = $create_page( 'Home', 'home', $home_content, 0, 'page-landing.html' );
-
-	// Destinations
-	$destinations_content = '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-xx-large-font-size">Destinations in Calabria</h1>
+	$dest = $mk_page( 'Destinations', 'destinations', '<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|30"}}},"backgroundColor":"neutral-light","layout":{"type":"constrained"}} -->
+<div class="wp-block-group has-neutral-light-background-color has-background" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--30)">
+<!-- wp:heading {"textAlign":"center","level":1,"fontSize":"hero","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-hero-font-size">Destinations</h1>
 <!-- /wp:heading -->
-
 <!-- wp:paragraph {"align":"center","fontSize":"large"} -->
-<p class="has-text-align-center has-large-font-size">From ancient Greek colonies to cliff-top villages perched above turquoise waters — explore the best places Calabria has to offer.</p>
+<p class="has-text-align-center has-large-font-size">From ancient Greek colonies to cliff-top villages above turquoise waters.</p>
 <!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+<!-- wp:pattern {"slug":"best-of-calabria/featured-destinations"} /-->' );
 
-<!-- wp:pattern {"slug":"best-of-calabria/featured-destinations"} /-->';
-
-	$dest_id = $create_page( 'Destinations', 'destinations', $destinations_content );
-
-	$destinations = array(
-		'reggio-calabria' => array( 'Reggio Calabria', 'The capital of Calabria\'s metropolitan area, home to the famous Bronzi di Riace and one of the most beautiful waterfronts in Italy.' ),
-		'tropea'          => array( 'Tropea', 'Perched on a cliff above the Tyrrhenian Sea, Tropea is Calabria\'s most iconic destination with crystal-clear waters and the dramatic Santa Maria dell\'Isola.' ),
-		'scilla'          => array( 'Scilla', 'Named after the mythological sea monster from Homer\'s Odyssey. The Chianalea fishing quarter is one of Italy\'s most charming neighborhoods.' ),
-		'pizzo'           => array( 'Pizzo', 'Birthplace of tartufo gelato, with the mysterious Piedigrotta cave church and a charming historic center overlooking the sea.' ),
-		'bova'            => array( 'Bova', 'Cultural capital of the Grecanici, descendants of ancient Greek settlers who still speak Griko. A living museum of Magna Graecia heritage.' ),
-		'gerace'          => array( 'Gerace', 'Home to the largest Norman cathedral in Calabria, a perfectly preserved medieval town perched on a rocky plateau.' ),
-		'stilo'           => array( 'Stilo', 'Famous for the Cattolica di Stilo, a 9th-century Byzantine church and UNESCO World Heritage candidate.' ),
-		'cosenza'         => array( 'Cosenza', 'The "Athens of Calabria" — a university city with a vibrant old town, the Telesio theater, and the MAB open-air museum.' ),
-		'catanzaro'       => array( 'Catanzaro', 'The regional capital sits on a hilltop between two seas with spectacular belvedere views and silk-weaving tradition.' ),
-		'locri'           => array( 'Locri', 'Home to Locri Epizefiri, one of the most important Greek colonies in Magna Graecia, dating back to the 7th century BC.' ),
+	$dests = array(
+		'reggio-calabria' => array( 'Reggio Calabria', 'Capital of Calabria, home to the Bronzi di Riace and the Lungomare Falcomata — "the most beautiful kilometer in Italy."' ),
+		'tropea'          => array( 'Tropea', 'Perched on a cliff above the Tyrrhenian Sea with crystal-clear waters and the iconic Santa Maria dell\'Isola church.' ),
+		'scilla'          => array( 'Scilla', 'Named after Homer\'s mythological sea monster. The Chianalea fishing quarter is "Little Venice of the South."' ),
+		'pizzo'           => array( 'Pizzo', 'Birthplace of tartufo gelato with the mysterious Piedigrotta cave church carved from rock.' ),
+		'bova'            => array( 'Bova', 'Cultural capital of the Grecanici who still speak Griko, a language rooted in ancient Greek.' ),
+		'gerace'          => array( 'Gerace', 'Largest Norman cathedral in Calabria. A perfectly preserved medieval town on a rocky plateau.' ),
+		'stilo'           => array( 'Stilo', 'The 9th-century Cattolica di Stilo, a Byzantine masterpiece and UNESCO candidate.' ),
+		'cosenza'         => array( 'Cosenza', 'The "Athens of Calabria" with a vibrant old town, Telesio theater, and MAB museum.' ),
+		'catanzaro'       => array( 'Catanzaro', 'Regional capital on a hilltop between two seas with spectacular belvedere views.' ),
+		'locri'           => array( 'Locri', 'Archaeological site of Locri Epizefiri, one of the most important Greek colonies in Magna Graecia.' ),
 	);
 
-	foreach ( $destinations as $slug => $d ) {
-		$content = '<!-- wp:heading {"level":1,"fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-heading-font-family has-xx-large-font-size">' . esc_html( $d[0] ) . '</h1>
+	foreach ( $dests as $s => $d ) {
+		$c = '<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|30"}}},"backgroundColor":"neutral-light","layout":{"type":"constrained"}} -->
+<div class="wp-block-group has-neutral-light-background-color has-background" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--30)">
+<!-- wp:heading {"textAlign":"center","level":1,"fontSize":"hero","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-hero-font-size">' . esc_html( $d[0] ) . '</h1>
 <!-- /wp:heading -->
-
-<!-- wp:paragraph {"fontSize":"large"} -->
-<p class="has-large-font-size">' . esc_html( $d[1] ) . '</p>
+<!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<p class="has-text-align-center has-large-font-size">' . esc_html( $d[1] ) . '</p>
 <!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
 
+<!-- wp:group {"layout":{"type":"constrained","contentSize":"800px"}} -->
+<div class="wp-block-group">
 <!-- wp:heading -->
 <h2 class="wp-block-heading">What to see</h2>
 <!-- /wp:heading -->
-
 <!-- wp:paragraph -->
 <p>Comprehensive guide coming soon.</p>
 <!-- /wp:paragraph -->
-
 <!-- wp:heading -->
 <h2 class="wp-block-heading">Where to stay</h2>
 <!-- /wp:heading -->
-
 <!-- wp:paragraph -->
 <p>Accommodation recommendations coming soon.</p>
 <!-- /wp:paragraph -->
-
 <!-- wp:heading -->
 <h2 class="wp-block-heading">How to get there</h2>
 <!-- /wp:heading -->
-
 <!-- wp:paragraph -->
 <p>Transportation guide coming soon.</p>
 <!-- /wp:paragraph -->
-
+</div>
+<!-- /wp:group -->
 <!-- wp:pattern {"slug":"best-of-calabria/newsletter-cta"} /-->';
-
-		$create_page( $d[0], $slug, $content, $dest_id );
+		$mk_page( $d[0], $s, $c, $dest );
 	}
 
-	// Nature
-	$nature_id = $create_page( 'Nature', 'nature', '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-xx-large-font-size">Nature &amp; Outdoors</h1>
+	$nature = $mk_page( 'Nature', 'nature', '<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|30"}}},"backgroundColor":"neutral-light","layout":{"type":"constrained"}} -->
+<div class="wp-block-group has-neutral-light-background-color has-background" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--30)">
+<!-- wp:heading {"textAlign":"center","level":1,"fontSize":"hero","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-hero-font-size">Nature &amp; Outdoors</h1>
 <!-- /wp:heading -->
-
 <!-- wp:paragraph {"align":"center","fontSize":"large"} -->
-<p class="has-text-align-center has-large-font-size">Three national parks, 800 kilometers of coastline, wild mountains and pristine beaches.</p>
-<!-- /wp:paragraph -->' );
+<p class="has-text-align-center has-large-font-size">Three national parks, 800 km of coastline, wild mountains and pristine beaches.</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->' );
 
-	foreach ( array(
-		'aspromonte'    => 'Aspromonte National Park',
-		'sila'          => 'Sila National Park',
-		'pollino'       => 'Pollino National Park',
-		'costa-viola'   => 'Costa Viola',
-		'capo-vaticano' => 'Capo Vaticano',
-		'beaches'       => 'Best Beaches',
-	) as $slug => $title ) {
-		$create_page( $title, $slug, '', $nature_id );
+	foreach ( array( 'aspromonte' => 'Aspromonte National Park', 'sila' => 'Sila National Park', 'pollino' => 'Pollino National Park', 'costa-viola' => 'Costa Viola', 'capo-vaticano' => 'Capo Vaticano', 'beaches' => 'Best Beaches' ) as $s => $t ) {
+		$mk_page( $t, $s, '', $nature );
 	}
 
-	// Cuisine
-	$cuisine_id = $create_page( 'Cuisine', 'cuisine', '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-xx-large-font-size">Calabrian Cuisine</h1>
+	$cuisine = $mk_page( 'Cuisine', 'cuisine', '<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|30"}}},"backgroundColor":"neutral-light","layout":{"type":"constrained"}} -->
+<div class="wp-block-group has-neutral-light-background-color has-background" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--30)">
+<!-- wp:heading {"textAlign":"center","level":1,"fontSize":"hero","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-hero-font-size">Calabrian Cuisine</h1>
 <!-- /wp:heading -->
-
 <!-- wp:paragraph {"align":"center","fontSize":"large"} -->
 <p class="has-text-align-center has-large-font-size">Spicy \'nduja, fresh swordfish, hand-rolled fileja pasta, and the world\'s best bergamot.</p>
-<!-- /wp:paragraph -->' );
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->' );
 
-	foreach ( array(
-		'recipes' => 'Recipes', 'products' => 'Local Products', 'restaurants' => 'Restaurant Guide',
-		'wine' => 'Calabrian Wine', 'street-food' => 'Street Food',
-	) as $slug => $title ) {
-		$create_page( $title, $slug, '', $cuisine_id );
+	foreach ( array( 'recipes' => 'Recipes', 'products' => 'Local Products', 'restaurants' => 'Restaurant Guide', 'wine' => 'Calabrian Wine', 'street-food' => 'Street Food' ) as $s => $t ) {
+		$mk_page( $t, $s, '', $cuisine );
 	}
 
-	// Culture
-	$culture_id = $create_page( 'Culture & History', 'culture', '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-xx-large-font-size">Culture &amp; History</h1>
+	$culture = $mk_page( 'Culture & History', 'culture', '<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|30"}}},"backgroundColor":"neutral-light","layout":{"type":"constrained"}} -->
+<div class="wp-block-group has-neutral-light-background-color has-background" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--30)">
+<!-- wp:heading {"textAlign":"center","level":1,"fontSize":"hero","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-hero-font-size">Culture &amp; History</h1>
 <!-- /wp:heading -->
-
 <!-- wp:paragraph {"align":"center","fontSize":"large"} -->
-<p class="has-text-align-center has-large-font-size">From Magna Graecia to the Normans — Calabria\'s culture is 3,000 years deep.</p>
-<!-- /wp:paragraph -->' );
+<p class="has-text-align-center has-large-font-size">From Magna Graecia to the Normans — 3,000 years of Calabrian heritage.</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->' );
 
-	foreach ( array(
-		'history' => 'History', 'traditions' => 'Traditions & Festivals',
-		'language' => 'Language & Dialect', 'art' => 'Art & Crafts',
-	) as $slug => $title ) {
-		$create_page( $title, $slug, '', $culture_id );
+	foreach ( array( 'history' => 'History', 'traditions' => 'Traditions & Festivals', 'language' => 'Language & Dialect', 'art' => 'Art & Crafts' ) as $s => $t ) {
+		$mk_page( $t, $s, '', $culture );
 	}
 
-	// Practical
-	$practical_id = $create_page( 'Practical Info', 'practical', '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-xx-large-font-size">Practical Information</h1>
+	$practical = $mk_page( 'Practical Info', 'practical', '<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|30"}}},"backgroundColor":"neutral-light","layout":{"type":"constrained"}} -->
+<div class="wp-block-group has-neutral-light-background-color has-background" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--30)">
+<!-- wp:heading {"textAlign":"center","level":1,"fontSize":"hero","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-hero-font-size">Practical Information</h1>
 <!-- /wp:heading -->
-
 <!-- wp:paragraph {"align":"center","fontSize":"large"} -->
 <p class="has-text-align-center has-large-font-size">Everything you need to plan your trip to Calabria.</p>
-<!-- /wp:paragraph -->' );
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->' );
+
+	foreach ( array( 'getting-there' => 'Getting There', 'accommodation' => 'Where to Stay', 'car-rental' => 'Car Rental', 'safety' => 'Safety Tips', 'weather' => 'Weather & Best Time', 'itineraries' => 'Itineraries' ) as $s => $t ) {
+		$mk_page( $t, $s, '', $practical );
+	}
+
+	$blog = $mk_page( 'Blog', 'blog', '' );
+	$mk_page( 'About', 'about', '<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|30"}}},"backgroundColor":"neutral-light","layout":{"type":"constrained"}} -->
+<div class="wp-block-group has-neutral-light-background-color has-background" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--30)">
+<!-- wp:heading {"textAlign":"center","level":1,"fontSize":"hero","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-hero-font-size">About</h1>
+<!-- /wp:heading -->
+</div>
+<!-- /wp:group -->
+<!-- wp:group {"layout":{"type":"constrained","contentSize":"800px"}} -->
+<div class="wp-block-group">
+<!-- wp:paragraph {"fontSize":"large"} -->
+<p class="has-large-font-size">We are passionate travelers on a mission to share the beauty of southern Italy\'s best-kept secret with the world.</p>
+<!-- /wp:paragraph -->
+<!-- wp:paragraph -->
+<p>Calabria is often overlooked by tourists heading to Tuscany or the Amalfi Coast. But those who venture to the toe of Italy\'s boot discover something extraordinary — pristine beaches, wild mountains, ancient Greek heritage, and the most authentic Italian food.</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->' );
+	$mk_page( 'Contact', 'contact', '<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|30"}}},"backgroundColor":"neutral-light","layout":{"type":"constrained"}} -->
+<div class="wp-block-group has-neutral-light-background-color has-background" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--30)">
+<!-- wp:heading {"textAlign":"center","level":1,"fontSize":"hero","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-hero-font-size">Contact</h1>
+<!-- /wp:heading -->
+</div>
+<!-- /wp:group -->
+<!-- wp:group {"layout":{"type":"constrained","contentSize":"800px"}} -->
+<div class="wp-block-group">
+<!-- wp:paragraph -->
+<p>Email: hello@bestofcalabria.com</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->' );
+	$mk_page( 'Privacy Policy', 'privacy-policy' );
+	$mk_page( 'Partnership', 'partnership', '<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|30"}}},"backgroundColor":"neutral-light","layout":{"type":"constrained"}} -->
+<div class="wp-block-group has-neutral-light-background-color has-background" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--30)">
+<!-- wp:heading {"textAlign":"center","level":1,"fontSize":"hero","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-hero-font-size">Partner With Us</h1>
+<!-- /wp:heading -->
+</div>
+<!-- /wp:group -->
+<!-- wp:group {"layout":{"type":"constrained","contentSize":"800px"}} -->
+<div class="wp-block-group">
+<!-- wp:paragraph {"fontSize":"large"} -->
+<p class="has-large-font-size">Reach travelers interested in Calabria through sponsored content and advertising.</p>
+<!-- /wp:paragraph -->
+<!-- wp:paragraph -->
+<p>Contact: partners@bestofcalabria.com</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->' );
+
+	// ═══ PL PAGES ═══
+	echo "\n--- PL PAGES ---\n";
+
+	$pl = $mk_page( 'PL', 'pl', '<!-- wp:pattern {"slug":"best-of-calabria/hero-home"} /-->
+<!-- wp:pattern {"slug":"best-of-calabria/section-categories"} /-->
+<!-- wp:pattern {"slug":"best-of-calabria/newsletter-cta"} /-->', 0, 'page-landing.html' );
+
+	$pl_dest = $mk_page( 'Miejsca', 'miejsca', '<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|30"}}},"backgroundColor":"neutral-light","layout":{"type":"constrained"}} -->
+<div class="wp-block-group has-neutral-light-background-color has-background" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--30)">
+<!-- wp:heading {"textAlign":"center","level":1,"fontSize":"hero","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-hero-font-size">Miejsca w Kalabrii</h1>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<p class="has-text-align-center has-large-font-size">Od starożytnych greckich kolonii po wioski na klifach nad turkusową wodą.</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->', $pl );
 
 	foreach ( array(
-		'getting-there' => 'Getting There', 'accommodation' => 'Where to Stay',
-		'car-rental' => 'Car Rental', 'safety' => 'Safety Tips',
-		'weather' => 'Weather & Best Time to Visit', 'itineraries' => 'Itineraries',
-	) as $slug => $title ) {
-		$create_page( $title, $slug, '', $practical_id );
+		'reggio-calabria-pl' => 'Reggio Calabria',
+		'tropea-pl' => 'Tropea',
+		'scilla-pl' => 'Scilla',
+		'pizzo-pl' => 'Pizzo',
+		'bova-pl' => 'Bova',
+	) as $s => $t ) {
+		$mk_page( $t, $s, '', $pl_dest );
 	}
 
-	// Static pages
-	$create_page( 'About', 'about', '<!-- wp:heading {"level":1,"fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-heading-font-family has-xx-large-font-size">About Best of Calabria</h1>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>We\'re passionate travelers on a mission to share the beauty of southern Italy\'s best-kept secret with the world.</p>
-<!-- /wp:paragraph -->' );
-
-	$create_page( 'Contact', 'contact', '<!-- wp:heading {"level":1,"fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-heading-font-family has-xx-large-font-size">Contact Us</h1>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Email: hello@bestofcalabria.com</p>
-<!-- /wp:paragraph -->' );
-
-	// Blog page (needed for post listing)
-	$blog_id = $create_page( 'Blog', 'blog', '' );
-
-	$create_page( 'Privacy Policy', 'privacy-policy' );
-
-	$create_page( 'Partnership', 'partnership', '<!-- wp:heading {"level":1,"fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-heading-font-family has-xx-large-font-size">Partner With Us</h1>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Contact us at partners@bestofcalabria.com to discuss collaboration.</p>
-<!-- /wp:paragraph -->' );
-
-	// ═══ POLISH PAGES ═══
-	echo "\n=== CREATING POLISH PAGES ===\n\n";
-
-	// PL parent — this will create /pl/ URL prefix
-	$pl_id = $create_page( 'Strona główna', 'pl', '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"hero","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-hero-font-size">Best of Calabria</h1>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph {"align":"center","fontSize":"large"} -->
-<p class="has-text-align-center has-large-font-size">Odkryj ukryty klejnot Włoch. Dramatyczne klify Tropei, starożytne ulice Reggio Calabria — oszałamiające plaże, dzikie góry, niesamowite jedzenie i autentyczna kultura.</p>
-<!-- /wp:paragraph -->', 0, 'page-landing.html' );
-
-	$pl_dest_id = $create_page( 'Miejsca', 'miejsca', '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-xx-large-font-size">Miejsca w Kalabrii</h1>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph {"align":"center","fontSize":"large"} -->
-<p class="has-text-align-center has-large-font-size">Od starożytnych greckich kolonii po klify nad turkusową wodą — odkryj najpiękniejsze miejsca Kalabrii.</p>
-<!-- /wp:paragraph -->', $pl_id );
-
-	$pl_destinations = array(
-		'reggio-calabria-pl' => array( 'Reggio Calabria', 'Stolica metropolitalna Kalabrii, dom słynnych Brązów z Riace i jednego z najpiękniejszych bulwarów Włoch — Lungomare Falcomatà.' ),
-		'tropea-pl'          => array( 'Tropea', 'Wisząca na klifie nad Morzem Tyrreńskim, Tropea to najbardziej ikoniczne miejsce Kalabrii z krystalicznie czystą wodą.' ),
-		'scilla-pl'          => array( 'Scilla', 'Nazwana od mitologicznego morskiego potwora z Odysei Homera. Dzielnica rybacka Chianalea to jedna z najurokliwszych w Italii.' ),
-		'pizzo-pl'           => array( 'Pizzo', 'Miejsce narodzin tartufo — najsłynniejszych włoskich lodów. Z tajemniczym kościołem wykutym w skale Piedigrotta.' ),
-		'bova-pl'            => array( 'Bova', 'Stolica kulturowa Grecanici — potomków starożytnych greckich osadników, którzy wciąż mówią w języku Griko.' ),
-	);
-
-	foreach ( $pl_destinations as $slug => $d ) {
-		$create_page( $d[0], $slug, '<!-- wp:heading {"level":1,"fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-heading-font-family has-xx-large-font-size">' . esc_html( $d[0] ) . '</h1>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph {"fontSize":"large"} -->
-<p class="has-large-font-size">' . esc_html( $d[1] ) . '</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph -->
-<p>Pełny przewodnik wkrótce.</p>
-<!-- /wp:paragraph -->', $pl_dest_id );
-	}
-
-	$pl_nature_id = $create_page( 'Natura', 'natura', '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-xx-large-font-size">Natura i Outdoor</h1>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph {"align":"center","fontSize":"large"} -->
-<p class="has-text-align-center has-large-font-size">Trzy parki narodowe, 800 km wybrzeża, dzikie góry i dziewicze plaże.</p>
-<!-- /wp:paragraph -->', $pl_id );
-
-	$create_page( 'Kuchnia', 'kuchnia', '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-xx-large-font-size">Kuchnia Kalabryjska</h1>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph {"align":"center","fontSize":"large"} -->
-<p class="has-text-align-center has-large-font-size">Pikantna \'nduja, świeży miecznik, ręcznie robiony makaron fileja i najlepszy bergamot na świecie.</p>
-<!-- /wp:paragraph -->', $pl_id );
-
-	$create_page( 'Kultura i Historia', 'kultura', '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-xx-large-font-size">Kultura i Historia</h1>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph {"align":"center","fontSize":"large"} -->
-<p class="has-text-align-center has-large-font-size">Od Magna Graecia po Normanów — 3000 lat kultury Kalabrii.</p>
-<!-- /wp:paragraph -->', $pl_id );
-
-	$create_page( 'Praktyczne', 'praktyczne', '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-xx-large-font-size">Informacje Praktyczne</h1>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph {"align":"center","fontSize":"large"} -->
-<p class="has-text-align-center has-large-font-size">Wszystko czego potrzebujesz by zaplanować podróż do Kalabrii.</p>
-<!-- /wp:paragraph -->', $pl_id );
-
-	$create_page( 'O nas', 'o-nas', '<!-- wp:heading {"level":1,"fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-heading-font-family has-xx-large-font-size">O Best of Calabria</h1>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Jesteśmy pasjonatami podróży, których misją jest pokazanie światu piękna najlepiej strzeżonego sekretu południowych Włoch.</p>
-<!-- /wp:paragraph -->', $pl_id );
-
-	$create_page( 'Kontakt', 'kontakt-pl', '<!-- wp:heading {"level":1,"fontSize":"xx-large","fontFamily":"heading"} -->
-<h1 class="wp-block-heading has-heading-font-family has-xx-large-font-size">Kontakt</h1>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Email: hello@bestofcalabria.com</p>
-<!-- /wp:paragraph -->', $pl_id );
+	$mk_page( 'Natura', 'natura', '', $pl );
+	$mk_page( 'Kuchnia', 'kuchnia', '', $pl );
+	$mk_page( 'Kultura', 'kultura', '', $pl );
+	$mk_page( 'Praktyczne', 'praktyczne', '', $pl );
+	$mk_page( 'O nas', 'o-nas', '', $pl );
+	$mk_page( 'Kontakt', 'kontakt-pl', '', $pl );
 
 	// ═══ CATEGORIES ═══
-	echo "\n=== CREATING CATEGORIES ===\n\n";
+	echo "\n--- CATEGORIES ---\n";
+	$c1 = $mk_cat( 'Destinations', 'destinations', 'Places to visit' );
+	$c2 = $mk_cat( 'Nature', 'nature', 'Nature and outdoor' );
+	$c3 = $mk_cat( 'Cuisine', 'cuisine', 'Food and drink' );
+	$c4 = $mk_cat( 'Culture', 'culture', 'History and traditions' );
+	$c5 = $mk_cat( 'Practical', 'practical', 'Travel tips' );
+	$c6 = $mk_cat( 'Hidden Gems', 'hidden-gems', 'Off the beaten path' );
 
-	$cat_dest   = $create_cat( 'Destinations', 'destinations', 'Articles about places to visit in Calabria' );
-	$cat_nature = $create_cat( 'Nature', 'nature', 'Nature and outdoor activities' );
-	$cat_food   = $create_cat( 'Cuisine', 'cuisine', 'Food, recipes, restaurants and wine' );
-	$cat_cult   = $create_cat( 'Culture', 'culture', 'History, traditions, art and language' );
-	$cat_pract  = $create_cat( 'Practical', 'practical', 'Travel tips, transport, accommodation' );
-	$cat_gems   = $create_cat( 'Hidden Gems', 'hidden-gems', 'Off-the-beaten-path places' );
-
-	// ═══ SAMPLE POSTS ═══
-	echo "\n=== CREATING SAMPLE POSTS ===\n\n";
-
-	$create_post(
-		'10 Reasons Why Calabria Should Be Your Next Italian Destination',
-		'10-reasons-calabria-next-destination',
+	// ═══ POSTS ═══
+	echo "\n--- SAMPLE POSTS ---\n";
+	$mk_post( '10 Reasons Why Calabria Should Be Your Next Destination', '10-reasons-calabria',
 		'<!-- wp:paragraph {"fontSize":"large"} -->
-<p class="has-large-font-size">While millions flock to Rome and the Amalfi Coast, Calabria remains beautifully unspoiled. Here\'s why it deserves a spot on your bucket list.</p>
+<p class="has-large-font-size">While millions flock to Rome and the Amalfi Coast, Calabria remains beautifully unspoiled.</p>
 <!-- /wp:paragraph -->
+<!-- wp:heading --><h2 class="wp-block-heading">1. Beaches that rival the Caribbean</h2><!-- /wp:heading -->
+<!-- wp:paragraph --><p>Tropea and Capo Vaticano offer turquoise waters at a fraction of the price.</p><!-- /wp:paragraph -->
+<!-- wp:heading --><h2 class="wp-block-heading">2. The best Italian food you\'ve never had</h2><!-- /wp:heading -->
+<!-- wp:paragraph --><p>From spicy \'nduja to hand-rolled fileja pasta — bold, unforgettable flavors.</p><!-- /wp:paragraph -->
+<!-- wp:heading --><h2 class="wp-block-heading">3. Three wild national parks</h2><!-- /wp:heading -->
+<!-- wp:paragraph --><p>Aspromonte, Sila, and Pollino — mountains, forests, and ancient trees.</p><!-- /wp:paragraph -->',
+		array( $c1, $c5 ) );
 
-<!-- wp:heading -->
-<h2 class="wp-block-heading">1. Beaches that rival the Caribbean</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Tropea, Capo Vaticano, and the Costa degli Aranci offer turquoise waters and white sand at a fraction of the price.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:heading -->
-<h2 class="wp-block-heading">2. Authentic Italian food at its best</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>From spicy \'nduja to hand-rolled fileja pasta with goat ragu, the flavors are bold and unforgettable.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:heading -->
-<h2 class="wp-block-heading">3. Three national parks</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Aspromonte, Sila, and Pollino — from gentle lake walks to challenging mountain treks.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:heading -->
-<h2 class="wp-block-heading">4. 3,000 years of history</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Greek colonies, Byzantine churches, Norman castles, and living Greek-speaking communities.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:heading -->
-<h2 class="wp-block-heading">5. Incredibly affordable</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Expect to pay significantly less than northern Italy for accommodation, dining, and activities.</p>
-<!-- /wp:paragraph -->',
-		array( $cat_dest, $cat_pract )
-	);
-
-	$create_post(
-		'The Perfect 7-Day Calabria Itinerary',
-		'perfect-7-day-calabria-itinerary',
+	$mk_post( 'The Perfect 7-Day Calabria Itinerary', '7-day-calabria-itinerary',
 		'<!-- wp:paragraph {"fontSize":"large"} -->
-<p class="has-large-font-size">One week to experience the highlights — from the Tyrrhenian Coast to the mountains and down to the toe of the boot.</p>
+<p class="has-large-font-size">One week from the Tyrrhenian Coast through the mountains to the toe of Italy\'s boot.</p>
 <!-- /wp:paragraph -->
+<!-- wp:heading --><h2 class="wp-block-heading">Day 1-2: Tropea</h2><!-- /wp:heading -->
+<!-- wp:paragraph --><p>The cliff-top crown jewel of Calabria. Santa Maria dell\'Isola and world-class beaches.</p><!-- /wp:paragraph -->
+<!-- wp:heading --><h2 class="wp-block-heading">Day 3: Pizzo</h2><!-- /wp:heading -->
+<!-- wp:paragraph --><p>Original tartufo gelato and the Piedigrotta cave church.</p><!-- /wp:paragraph -->
+<!-- wp:heading --><h2 class="wp-block-heading">Day 4-5: Scilla &amp; Reggio</h2><!-- /wp:heading -->
+<!-- wp:paragraph --><p>Chianalea fishing village and the Bronzi di Riace.</p><!-- /wp:paragraph -->
+<!-- wp:heading --><h2 class="wp-block-heading">Day 6-7: Aspromonte &amp; Bova</h2><!-- /wp:heading -->
+<!-- wp:paragraph --><p>Wild mountains and the Greek-speaking village of Bova.</p><!-- /wp:paragraph -->',
+		array( $c5, $c1 ) );
 
-<!-- wp:heading -->
-<h2 class="wp-block-heading">Day 1-2: Tropea &amp; Capo Vaticano</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Start in Tropea, explore the old town, visit Santa Maria dell\'Isola, and spend a day at Capo Vaticano beaches.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:heading -->
-<h2 class="wp-block-heading">Day 3: Pizzo</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Original tartufo gelato and the mysterious Piedigrotta cave church.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:heading -->
-<h2 class="wp-block-heading">Day 4: Scilla</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>The fishing village of Chianalea — one of Italy\'s most romantic spots.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:heading -->
-<h2 class="wp-block-heading">Day 5: Reggio Calabria</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Bronzi di Riace and the Lungomare — "the most beautiful kilometer in Italy."</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:heading -->
-<h2 class="wp-block-heading">Day 6: Aspromonte &amp; Bova</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Wild mountains and the ancient Greek-Calabrian village of Bova.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:heading -->
-<h2 class="wp-block-heading">Day 7: Gerace &amp; Ionian Coast</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Medieval Gerace and the sandy Ionian beaches to finish your trip.</p>
-<!-- /wp:paragraph -->',
-		array( $cat_pract, $cat_dest )
-	);
-
-	$create_post(
-		'What is \'Nduja? The Ultimate Guide to Calabria\'s Famous Spicy Spread',
-		'what-is-nduja-guide',
+	$mk_post( 'What is \'Nduja? The Complete Guide', 'what-is-nduja',
 		'<!-- wp:paragraph {"fontSize":"large"} -->
-<p class="has-large-font-size">\'Nduja is a fiery, spreadable pork salami from Spilinga in Calabria. Here\'s everything you need to know.</p>
+<p class="has-large-font-size">A fiery, spreadable pork salami from Spilinga that has taken the culinary world by storm.</p>
 <!-- /wp:paragraph -->
+<!-- wp:heading --><h2 class="wp-block-heading">Origins</h2><!-- /wp:heading -->
+<!-- wp:paragraph --><p>From the French "andouille", transformed by Calabrians with generous peperoncino.</p><!-- /wp:paragraph -->
+<!-- wp:heading --><h2 class="wp-block-heading">How to eat it</h2><!-- /wp:heading -->
+<!-- wp:paragraph --><p>On crusty bread, melted into pasta, on pizza, or stirred into risotto.</p><!-- /wp:paragraph -->',
+		array( $c3 ) );
 
-<!-- wp:heading -->
-<h2 class="wp-block-heading">Origins</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>The name likely derives from the French "andouille", brought to Calabria during the Napoleonic period. The Calabrians made it their own with generous peperoncino.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:heading -->
-<h2 class="wp-block-heading">How to eat it</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Spread on crusty bread, melted into pasta sauces, on pizza, stirred into risotto, or to flavor beans and vegetables.</p>
-<!-- /wp:paragraph -->',
-		array( $cat_food )
-	);
-
-	$create_post(
-		'Chianalea di Scilla: Italy\'s Hidden "Little Venice"',
-		'chianalea-scilla-little-venice',
+	$mk_post( 'Chianalea: Italy\'s Hidden Little Venice', 'chianalea-little-venice',
 		'<!-- wp:paragraph {"fontSize":"large"} -->
-<p class="has-large-font-size">Forget Venice or Cinque Terre. A tiny fishing quarter clings to the rocks where the Tyrrhenian Sea meets the Strait of Messina.</p>
+<p class="has-large-font-size">A tiny fishing quarter clings to the rocks where the Tyrrhenian meets the Strait of Messina.</p>
 <!-- /wp:paragraph -->
-
-<!-- wp:paragraph -->
-<p>Chianalea is the ancient fishing quarter of Scilla. Houses are built directly on the rocks, narrow alleys wind between colorful buildings, and the scent of grilled swordfish fills the air. This isn\'t a tourist village — it\'s a living fishing community.</p>
-<!-- /wp:paragraph -->',
-		array( $cat_dest, $cat_gems )
-	);
+<!-- wp:paragraph --><p>Houses built on rocks, sea lapping at foundations, narrow alleys, grilled swordfish in the air. Not a tourist trap — a living fishing community for centuries.</p><!-- /wp:paragraph -->',
+		array( $c1, $c6 ) );
 
 	// ═══ SETTINGS ═══
-	echo "\n=== CONFIGURING SETTINGS ===\n\n";
-
-	if ( $home_id ) {
+	echo "\n--- SETTINGS ---\n";
+	if ( $home ) {
 		update_option( 'show_on_front', 'page' );
-		update_option( 'page_on_front', $home_id );
-		echo "Set static homepage\n";
+		update_option( 'page_on_front', $home );
+		echo "Homepage set\n";
 	}
-
-	if ( $blog_id ) {
-		update_option( 'page_for_posts', $blog_id );
-		echo "Set blog page for posts listing\n";
+	if ( $blog ) {
+		update_option( 'page_for_posts', $blog );
+		echo "Blog page set\n";
 	}
-
 	update_option( 'blogname', 'Best of Calabria' );
 	update_option( 'blogdescription', 'The Ultimate Guide to Southern Italy' );
-	echo "Updated site title and tagline\n";
-
 	update_option( 'permalink_structure', '/%postname%/' );
-	echo "Set permalinks to /%postname%/\n";
-
 	flush_rewrite_rules();
-	echo "Flushed rewrite rules\n";
-
-	update_option( 'boc_content_imported', true );
-
-	echo "\n================================\n";
-	echo "DONE! All content imported.\n";
-	echo "================================\n";
-	echo '</pre>';
+	echo "Title, tagline, permalinks set\n";
+	echo "\nDONE!\n</pre>";
 }

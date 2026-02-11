@@ -57,34 +57,12 @@
 				{
 					"fontFamily": "'Playfair Display', Georgia, serif",
 					"slug": "heading",
-					"name": "Heading",
-					"fontFace": [
-						{
-							"fontFamily": "Playfair Display",
-							"fontWeight": "400 900",
-							"fontStyle": "normal",
-							"src": ["file:./assets/fonts/PlayfairDisplay-VariableFont_wght.woff2"]
-						},
-						{
-							"fontFamily": "Playfair Display",
-							"fontWeight": "400 900",
-							"fontStyle": "italic",
-							"src": ["file:./assets/fonts/PlayfairDisplay-Italic-VariableFont_wght.woff2"]
-						}
-					]
+					"name": "Heading"
 				},
 				{
 					"fontFamily": "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
 					"slug": "body",
-					"name": "Body",
-					"fontFace": [
-						{
-							"fontFamily": "Inter",
-							"fontWeight": "300 800",
-							"fontStyle": "normal",
-							"src": ["file:./assets/fonts/Inter-VariableFont_wght.woff2"]
-						}
-					]
+					"name": "Body"
 				}
 			],
 			"fontSizes": [

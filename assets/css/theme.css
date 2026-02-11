@@ -7,20 +7,41 @@ html {
 	scroll-behavior: smooth;
 }
 
-/* ─── Card style ─── */
+/* ─── Better base typography ─── */
+body {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Hero cover without image — gradient background ─── */
+.wp-block-cover:not(.has-background-image) .wp-block-cover__background {
+	background: linear-gradient(135deg,
+		var(--wp--preset--color--primary-dark) 0%,
+		var(--wp--preset--color--primary) 50%,
+		#2A6B8A 100%) !important;
+}
+
+/* ─── Page header sections ─── */
+.has-neutral-light-background-color {
+	border-bottom: 3px solid var(--wp--preset--color--secondary);
+}
+
+/* ─── Card styles ─── */
 .is-style-boc-card {
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 	transition: box-shadow 0.3s ease, transform 0.3s ease;
+	border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .is-style-boc-card-hover {
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 	transition: box-shadow 0.3s ease, transform 0.3s ease;
 	overflow: hidden;
+	border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .is-style-boc-card-hover:hover {
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
 	transform: translateY(-4px);
 }
 
@@ -43,9 +64,13 @@ html {
 	letter-spacing: 1em;
 }
 
-/* ─── Navigation improvements ─── */
+/* ─── Navigation ─── */
+.wp-block-navigation .wp-block-navigation-item a {
+	transition: color 0.2s ease;
+}
+
 .wp-block-navigation .wp-block-navigation-item a:hover {
-	color: var(--wp--preset--color--accent);
+	color: var(--wp--preset--color--accent) !important;
 }
 
 .wp-block-navigation .wp-block-navigation__responsive-container.is-menu-open {
@@ -56,12 +81,16 @@ html {
 .wp-block-cover .wp-block-heading,
 .wp-block-cover h1,
 .wp-block-cover h2 {
-	text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+.wp-block-cover p {
+	text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
 }
 
 /* ─── Featured image hover on cards ─── */
 .is-style-boc-card-hover .wp-block-post-featured-image img {
-	transition: transform 0.4s ease;
+	transition: transform 0.5s ease;
 }
 
 .is-style-boc-card-hover:hover .wp-block-post-featured-image img {
@@ -72,9 +101,9 @@ html {
 	overflow: hidden;
 }
 
-/* ─── Button hover transitions ─── */
+/* ─── Button transitions ─── */
 .wp-block-button__link {
-	transition: all 0.2s ease;
+	transition: all 0.25s ease;
 }
 
 .wp-block-button.is-style-outline .wp-block-button__link:hover {
@@ -83,7 +112,12 @@ html {
 	border-color: var(--wp--preset--color--primary);
 }
 
-/* ─── Blockquote styling ─── */
+/* Gold button variant */
+.has-secondary-background-color:hover {
+	opacity: 0.9;
+}
+
+/* ─── Blockquote ─── */
 .wp-block-quote {
 	position: relative;
 	padding-left: 1.5rem;
@@ -101,23 +135,16 @@ html {
 	opacity: 0.4;
 }
 
-/* ─── Post content typography ─── */
-.entry-content p,
-.wp-block-post-content p {
-	margin-bottom: 1.5em;
-}
-
-.entry-content h2,
+/* ─── Content spacing ─── */
 .wp-block-post-content h2 {
 	margin-top: 2.5em;
 }
 
-.entry-content h3,
 .wp-block-post-content h3 {
 	margin-top: 2em;
 }
 
-/* ─── Search block styling ─── */
+/* ─── Search block ─── */
 .wp-block-search .wp-block-search__input {
 	border: 2px solid var(--wp--preset--color--neutral);
 	border-radius: 4px;
@@ -127,11 +154,12 @@ html {
 .wp-block-search .wp-block-search__input:focus {
 	border-color: var(--wp--preset--color--primary);
 	outline: none;
+	box-shadow: 0 0 0 3px rgba(27, 77, 110, 0.15);
 }
 
 /* ─── Language switcher ─── */
 .boc-lang-switcher {
-	display: flex;
+	display: inline-flex;
 	align-items: center;
 	gap: 0.25rem;
 	margin-left: 1rem;
@@ -144,7 +172,7 @@ html {
 	font-weight: 600;
 	text-decoration: none;
 	color: var(--wp--preset--color--neutral-dark);
-	padding: 0.2rem 0.4rem;
+	padding: 0.2rem 0.5rem;
 	border-radius: 3px;
 	transition: all 0.2s ease;
 }
@@ -172,14 +200,52 @@ html {
 }
 
 .boc-destination-card img {
-	transition: transform 0.4s ease;
+	transition: transform 0.5s ease;
 }
 
 .boc-destination-card:hover img {
 	transform: scale(1.08);
 }
 
-/* ─── Responsive adjustments ─── */
+/* ─── Footer ─── */
+.has-primary-dark-background-color a {
+	transition: color 0.2s ease;
+}
+
+.has-primary-dark-background-color a:hover {
+	color: var(--wp--preset--color--secondary) !important;
+}
+
+/* ─── Newsletter CTA section ─── */
+.has-primary-background-color .wp-block-button__link {
+	background-color: var(--wp--preset--color--secondary) !important;
+	color: var(--wp--preset--color--primary-dark) !important;
+	font-weight: 700;
+}
+
+.has-primary-background-color .wp-block-button__link:hover {
+	background-color: var(--wp--preset--color--white) !important;
+}
+
+/* ─── Section category cards (emoji cards on homepage) ─── */
+.wp-block-column .wp-block-group.has-white-background-color {
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.wp-block-column .wp-block-group.has-white-background-color:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* ─── 404 page ─── */
+.wp-block-heading[style*="10rem"] {
+	background: linear-gradient(135deg, var(--wp--preset--color--primary), var(--wp--preset--color--secondary));
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+/* ─── Responsive ─── */
 @media (max-width: 781px) {
 	.wp-block-columns {
 		gap: var(--wp--preset--spacing--20) !important;
@@ -187,5 +253,10 @@ html {
 
 	.wp-block-cover {
 		min-height: 60vh !important;
+	}
+
+	.boc-lang-switcher {
+		margin-left: 0.5rem;
+		padding-left: 0.5rem;
 	}
 }
