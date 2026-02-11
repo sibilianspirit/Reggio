@@ -33,9 +33,41 @@ function boc_import_page() {
 
 	echo '<form method="post" style="margin:20px 0">';
 	wp_nonce_field( 'boc_nonce' );
-	echo '<h2>Step 1: Reset (optional)</h2>';
-	echo '<p>Deletes ALL pages, posts, and categories. Use this to start fresh.</p>';
-	echo '<button type="submit" name="boc_reset" value="1" class="button" onclick="return confirm(\'Delete ALL content? This cannot be undone.\')">Reset All Content</button>';
+
+	// Diagnostics
+	echo '<h2>Diagnostics</h2>';
+	echo '<div style="background:#f5f5f5;padding:15px;margin-bottom:20px;font-family:monospace;font-size:13px">';
+	$theme = wp_get_theme();
+	echo 'Active theme: <strong>' . esc_html( $theme->get( 'Name' ) ) . '</strong> v' . esc_html( $theme->get( 'Version' ) ) . '<br>';
+	echo 'Theme dir: ' . esc_html( get_template_directory() ) . '<br>';
+	echo 'style.css exists: ' . ( file_exists( get_template_directory() . '/style.css' ) ? 'YES' : 'NO' ) . '<br>';
+	echo 'theme.json exists: ' . ( file_exists( get_template_directory() . '/theme.json' ) ? 'YES' : 'NO' ) . '<br>';
+	echo 'home.html exists: ' . ( file_exists( get_template_directory() . '/templates/home.html' ) ? 'YES' : 'NO' ) . '<br>';
+	echo 'functions.php exists: ' . ( file_exists( get_template_directory() . '/functions.php' ) ? 'YES' : 'NO' ) . '<br>';
+	echo 'theme.css exists: ' . ( file_exists( get_template_directory() . '/assets/css/theme.css' ) ? 'YES' : 'NO' ) . '<br>';
+	echo 'Google Fonts enqueued: ' . ( wp_style_is( 'boc-google-fonts', 'enqueued' ) ? 'YES' : 'NO' ) . '<br>';
+
+	// Check cached templates in DB
+	$cached = get_posts( array( 'post_type' => 'wp_template', 'numberposts' => -1, 'post_status' => 'any' ) );
+	$cached_parts = get_posts( array( 'post_type' => 'wp_template_part', 'numberposts' => -1, 'post_status' => 'any' ) );
+	echo '<br>Cached templates in DB: <strong>' . count( $cached ) . '</strong><br>';
+	foreach ( $cached as $t ) {
+		echo '  - ' . esc_html( $t->post_name ) . ' (theme: ' . esc_html( $t->post_excerpt ) . ')<br>';
+	}
+	echo 'Cached template parts in DB: <strong>' . count( $cached_parts ) . '</strong><br>';
+	foreach ( $cached_parts as $t ) {
+		echo '  - ' . esc_html( $t->post_name ) . '<br>';
+	}
+
+	// WP Pusher info
+	$wp_pusher_dir = WP_CONTENT_DIR . '/plugins/wppusher/';
+	echo '<br>WP Pusher installed: ' . ( is_dir( $wp_pusher_dir ) ? 'YES' : 'NO' ) . '<br>';
+
+	echo '</div>';
+
+	echo '<h2>Step 1: Reset</h2>';
+	echo '<p>Deletes ALL pages, posts, categories, AND cached templates from database.</p>';
+	echo '<button type="submit" name="boc_reset" value="1" class="button" onclick="return confirm(\'Delete ALL content and template cache? This cannot be undone.\')">Reset All Content</button>';
 	echo '<h2 style="margin-top:30px">Step 2: Import</h2>';
 	echo '<p>Creates all pages, categories, sample posts, and configures settings.</p>';
 	echo '<button type="submit" name="boc_import" value="1" class="button button-primary">Import Content</button>';
@@ -61,8 +93,35 @@ function boc_reset_content() {
 			echo "Deleted category: {$c->name}\n";
 		}
 	}
+	// Delete cached block templates (THIS IS KEY — WP caches them in DB)
+	$templates = get_posts( array( 'post_type' => 'wp_template', 'numberposts' => -1, 'post_status' => 'any' ) );
+	foreach ( $templates as $t ) {
+		wp_delete_post( $t->ID, true );
+		echo "Deleted cached template: {$t->post_name}\n";
+	}
+	$parts = get_posts( array( 'post_type' => 'wp_template_part', 'numberposts' => -1, 'post_status' => 'any' ) );
+	foreach ( $parts as $t ) {
+		wp_delete_post( $t->ID, true );
+		echo "Deleted cached template part: {$t->post_name}\n";
+	}
+
+	// Delete cached navigation blocks
+	$navs = get_posts( array( 'post_type' => 'wp_navigation', 'numberposts' => -1, 'post_status' => 'any' ) );
+	foreach ( $navs as $n ) {
+		wp_delete_post( $n->ID, true );
+		echo "Deleted cached navigation: {$n->post_title}\n";
+	}
+
+	// Clear global styles
+	$styles = get_posts( array( 'post_type' => 'wp_global_styles', 'numberposts' => -1, 'post_status' => 'any' ) );
+	foreach ( $styles as $s ) {
+		wp_delete_post( $s->ID, true );
+		echo "Deleted cached global styles\n";
+	}
+
 	delete_option( 'boc_content_imported' );
-	echo "Done.\n</pre>";
+	wp_cache_flush();
+	echo "\nAll caches cleared. Done.\n</pre>";
 }
 
 function boc_run_import() {
