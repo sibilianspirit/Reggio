@@ -12,7 +12,25 @@
  */
 
 // Load WordPress
-require_once __DIR__ . '/../wp-load.php';
+// Try multiple paths to find wp-load.php
+$paths = array(
+	__DIR__ . '/wp-load.php',           // same directory
+	__DIR__ . '/../wp-load.php',        // parent directory (if in subfolder)
+	__DIR__ . '/../../wp-load.php',     // two levels up
+);
+
+$loaded = false;
+foreach ( $paths as $path ) {
+	if ( file_exists( $path ) ) {
+		require_once $path;
+		$loaded = true;
+		break;
+	}
+}
+
+if ( ! $loaded ) {
+	die( 'Could not find wp-load.php. Place this file in your WordPress root directory (next to wp-config.php).' );
+}
 
 if ( ! current_user_can( 'manage_options' ) ) {
 	wp_die( 'You must be logged in as admin to run this script.' );
