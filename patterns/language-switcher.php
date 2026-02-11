@@ -7,6 +7,8 @@
  * Inserter: false
  */
 
+$boc_lang_html = '';
+
 if ( function_exists( 'pll_the_languages' ) ) {
 	$languages = pll_the_languages( array(
 		'raw'                    => 1,
@@ -14,7 +16,6 @@ if ( function_exists( 'pll_the_languages' ) ) {
 	) );
 
 	if ( ! empty( $languages ) ) {
-		echo '<div class="boc-lang-switcher">';
 		$items = array();
 		foreach ( $languages as $lang ) {
 			$class = $lang['current_lang'] ? 'boc-lang-active' : '';
@@ -26,14 +27,15 @@ if ( function_exists( 'pll_the_languages' ) ) {
 				esc_html( strtoupper( $lang['slug'] ) )
 			);
 		}
-		echo implode( '<span class="boc-lang-sep">|</span>', $items );
-		echo '</div>';
+		$boc_lang_html = implode( '<span class="boc-lang-sep"> | </span>', $items );
 	}
 } else {
-	echo '<div class="boc-lang-switcher">';
-	echo '<a href="/" class="boc-lang-link" hreflang="en">EN</a>';
-	echo '<span class="boc-lang-sep">|</span>';
-	echo '<a href="/pl/" class="boc-lang-link" hreflang="pl">PL</a>';
-	echo '</div>';
+	$boc_lang_html = '<a href="/" class="boc-lang-link boc-lang-active" hreflang="en">EN</a>'
+		. '<span class="boc-lang-sep"> | </span>'
+		. '<a href="/pl/" class="boc-lang-link" hreflang="pl">PL</a>';
 }
 ?>
+
+<!-- wp:html -->
+<div class="boc-lang-switcher"><?php echo $boc_lang_html; ?></div>
+<!-- /wp:html -->
