@@ -42,8 +42,8 @@ function boc_import_page() {
 		echo '<div class="notice notice-success"><p><strong>Import complete!</strong> You can now deactivate and delete this plugin.</p></div>';
 		echo '<p><a href="' . admin_url( 'plugins.php' ) . '" class="button">Go to Plugins</a></p>';
 	} else {
-		if ( get_option( 'boc_content_imported' ) ) {
-			echo '<div class="notice notice-warning"><p>Content has already been imported. To re-import, first delete the option <code>boc_content_imported</code> from the database.</p></div>';
+		if ( false ) {
+			// Allow re-running
 		} else {
 			echo '<p>This will create:</p>';
 			echo '<ul style="list-style:disc;margin-left:20px">';
@@ -308,6 +308,9 @@ function boc_run_import() {
 <p>Email: hello@bestofcalabria.com</p>
 <!-- /wp:paragraph -->' );
 
+	// Blog page (needed for post listing)
+	$blog_id = $create_page( 'Blog', 'blog', '' );
+
 	$create_page( 'Privacy Policy', 'privacy-policy' );
 
 	$create_page( 'Partnership', 'partnership', '<!-- wp:heading {"level":1,"fontSize":"xx-large","fontFamily":"heading"} -->
@@ -317,6 +320,96 @@ function boc_run_import() {
 <!-- wp:paragraph -->
 <p>Contact us at partners@bestofcalabria.com to discuss collaboration.</p>
 <!-- /wp:paragraph -->' );
+
+	// ═══ POLISH PAGES ═══
+	echo "\n=== CREATING POLISH PAGES ===\n\n";
+
+	// PL parent — this will create /pl/ URL prefix
+	$pl_id = $create_page( 'Strona główna', 'pl', '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"hero","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-hero-font-size">Best of Calabria</h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<p class="has-text-align-center has-large-font-size">Odkryj ukryty klejnot Włoch. Dramatyczne klify Tropei, starożytne ulice Reggio Calabria — oszałamiające plaże, dzikie góry, niesamowite jedzenie i autentyczna kultura.</p>
+<!-- /wp:paragraph -->', 0, 'page-landing.html' );
+
+	$pl_dest_id = $create_page( 'Miejsca', 'miejsca', '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"xx-large","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-xx-large-font-size">Miejsca w Kalabrii</h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<p class="has-text-align-center has-large-font-size">Od starożytnych greckich kolonii po klify nad turkusową wodą — odkryj najpiękniejsze miejsca Kalabrii.</p>
+<!-- /wp:paragraph -->', $pl_id );
+
+	$pl_destinations = array(
+		'reggio-calabria-pl' => array( 'Reggio Calabria', 'Stolica metropolitalna Kalabrii, dom słynnych Brązów z Riace i jednego z najpiękniejszych bulwarów Włoch — Lungomare Falcomatà.' ),
+		'tropea-pl'          => array( 'Tropea', 'Wisząca na klifie nad Morzem Tyrreńskim, Tropea to najbardziej ikoniczne miejsce Kalabrii z krystalicznie czystą wodą.' ),
+		'scilla-pl'          => array( 'Scilla', 'Nazwana od mitologicznego morskiego potwora z Odysei Homera. Dzielnica rybacka Chianalea to jedna z najurokliwszych w Italii.' ),
+		'pizzo-pl'           => array( 'Pizzo', 'Miejsce narodzin tartufo — najsłynniejszych włoskich lodów. Z tajemniczym kościołem wykutym w skale Piedigrotta.' ),
+		'bova-pl'            => array( 'Bova', 'Stolica kulturowa Grecanici — potomków starożytnych greckich osadników, którzy wciąż mówią w języku Griko.' ),
+	);
+
+	foreach ( $pl_destinations as $slug => $d ) {
+		$create_page( $d[0], $slug, '<!-- wp:heading {"level":1,"fontSize":"xx-large","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-heading-font-family has-xx-large-font-size">' . esc_html( $d[0] ) . '</h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"fontSize":"large"} -->
+<p class="has-large-font-size">' . esc_html( $d[1] ) . '</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Pełny przewodnik wkrótce.</p>
+<!-- /wp:paragraph -->', $pl_dest_id );
+	}
+
+	$pl_nature_id = $create_page( 'Natura', 'natura', '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"xx-large","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-xx-large-font-size">Natura i Outdoor</h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<p class="has-text-align-center has-large-font-size">Trzy parki narodowe, 800 km wybrzeża, dzikie góry i dziewicze plaże.</p>
+<!-- /wp:paragraph -->', $pl_id );
+
+	$create_page( 'Kuchnia', 'kuchnia', '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"xx-large","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-xx-large-font-size">Kuchnia Kalabryjska</h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<p class="has-text-align-center has-large-font-size">Pikantna \'nduja, świeży miecznik, ręcznie robiony makaron fileja i najlepszy bergamot na świecie.</p>
+<!-- /wp:paragraph -->', $pl_id );
+
+	$create_page( 'Kultura i Historia', 'kultura', '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"xx-large","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-xx-large-font-size">Kultura i Historia</h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<p class="has-text-align-center has-large-font-size">Od Magna Graecia po Normanów — 3000 lat kultury Kalabrii.</p>
+<!-- /wp:paragraph -->', $pl_id );
+
+	$create_page( 'Praktyczne', 'praktyczne', '<!-- wp:heading {"level":1,"textAlign":"center","fontSize":"xx-large","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-text-align-center has-heading-font-family has-xx-large-font-size">Informacje Praktyczne</h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<p class="has-text-align-center has-large-font-size">Wszystko czego potrzebujesz by zaplanować podróż do Kalabrii.</p>
+<!-- /wp:paragraph -->', $pl_id );
+
+	$create_page( 'O nas', 'o-nas', '<!-- wp:heading {"level":1,"fontSize":"xx-large","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-heading-font-family has-xx-large-font-size">O Best of Calabria</h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Jesteśmy pasjonatami podróży, których misją jest pokazanie światu piękna najlepiej strzeżonego sekretu południowych Włoch.</p>
+<!-- /wp:paragraph -->', $pl_id );
+
+	$create_page( 'Kontakt', 'kontakt-pl', '<!-- wp:heading {"level":1,"fontSize":"xx-large","fontFamily":"heading"} -->
+<h1 class="wp-block-heading has-heading-font-family has-xx-large-font-size">Kontakt</h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Email: hello@bestofcalabria.com</p>
+<!-- /wp:paragraph -->', $pl_id );
 
 	// ═══ CATEGORIES ═══
 	echo "\n=== CREATING CATEGORIES ===\n\n";
@@ -482,6 +575,11 @@ function boc_run_import() {
 		update_option( 'show_on_front', 'page' );
 		update_option( 'page_on_front', $home_id );
 		echo "Set static homepage\n";
+	}
+
+	if ( $blog_id ) {
+		update_option( 'page_for_posts', $blog_id );
+		echo "Set blog page for posts listing\n";
 	}
 
 	update_option( 'blogname', 'Best of Calabria' );
