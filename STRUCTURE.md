@@ -1,131 +1,307 @@
-# BestOfCalabria.com - The Ultimate Calabria Guide
+# BestOfCalabria.com — Complete Site Architecture v3
 
-## Project vision
-
-Comprehensive knowledge hub about the Calabria region in southern Italy.
-Monetized through affiliates, ads, sponsored content and local services.
-Bilingual: EN (default) + PL.
-
----
-
-## Site structure
-
-### 1. Homepage (`/`)
-- Hero with Calabrian coast panorama
-- "Why Calabria?" section (3-4 USP cards)
-- Featured destinations grid
-- Latest articles
-- Newsletter signup
-- Quick links to main sections
-
-### 2. Destinations (`/destinations/`)
-Main hub for all cities and places:
-- `/destinations/reggio-calabria/` - capital, Bronzi di Riace, Museo Nazionale, Lungomare
-- `/destinations/tropea/` - cliff-top town, beaches, Santa Maria dell'Isola
-- `/destinations/scilla/` - Chianalea fishing village, castle, Strait of Messina
-- `/destinations/pizzo/` - tartufo gelato, Piedigrotta church, historic center
-- `/destinations/bova/` - Greek-Calabrian village, Grecanico heritage
-- `/destinations/gerace/` - Norman cathedral, medieval town
-- `/destinations/stilo/` - Cattolica di Stilo, Byzantine heritage
-- `/destinations/locri/` - Locri Epizefiri archaeological site
-- `/destinations/cosenza/` - old town, Telesio theater, MAB museum
-- `/destinations/catanzaro/` - regional capital, belvedere views
-
-### 3. Nature & Outdoors (`/nature/`)
-- `/nature/aspromonte/` - Aspromonte National Park, trekking, waterfalls
-- `/nature/sila/` - Sila National Park, lakes, forests
-- `/nature/pollino/` - Pollino National Park (shared with Basilicata)
-- `/nature/costa-viola/` - Costa Viola coastline
-- `/nature/capo-vaticano/` - beaches, grottos, diving
-- `/nature/beaches/` - best beaches guide
-
-### 4. Cuisine (`/cuisine/`)
-- `/cuisine/recipes/` - nduja, bergamotto, pesce spada, fileja
-- `/cuisine/products/` - DOP/IGP local products
-- `/cuisine/restaurants/` - restaurant guide (affiliate)
-- `/cuisine/wine/` - Calabrian wines (Ciro, Greco di Bianco, Gaglioppo)
-- `/cuisine/street-food/` - tartufo di Pizzo, grattachecca, zeppole
-
-### 5. Culture & History (`/culture/`)
-- `/culture/history/` - from Magna Graecia to modern times
-- `/culture/traditions/` - festivals (Festa della Madonna, Varia di Palmi)
-- `/culture/language/` - Calabrese dialect, Grecanico in Bova
-- `/culture/art/` - crafts, weaving, ceramics, Codex Purpureus
-
-### 6. Practical Info (`/practical/`)
-- `/practical/getting-there/` - flights, trains, ferries (Lamezia, Reggio airports)
-- `/practical/accommodation/` - hotels, B&B, agriturismi (Booking/Airbnb affiliate)
-- `/practical/car-rental/` - rental guide (affiliate)
-- `/practical/safety/` - tips for tourists
-- `/practical/weather/` - climate, best time to visit
-- `/practical/itineraries/` - 3-day, 7-day, 14-day itineraries
-
-### 7. Blog (`/blog/`)
-- Long-tail SEO articles
-- Travel stories
-- Interviews with locals
-- Seasonal guides
-- "Hidden gems" series
-
-### 8. Static pages
-- `/about/` - about the project
-- `/contact/` - contact form
-- `/privacy-policy/`
-- `/partnership/` - advertising, sponsored content offer
+## Vision
+Comprehensive knowledge hub about Calabria, southern Italy.
+Monetized through affiliates, ads, sponsored content.
+EN (default, root) + PL (/pl/).
+Theme: **GeneratePress Premium**.
 
 ---
 
-## Monetization model
+## URL Architecture
 
-| Channel | Description | Priority |
-|---------|-------------|----------|
-| **Booking/Airbnb affiliate** | Accommodation links per destination | High |
-| **Car rental affiliate** | Discover Cars, Rentalcars | High |
-| **Google AdSense** | Display ads | Medium |
-| **Sponsored content** | Articles from local businesses | Medium |
-| **GetYourGuide/Viator** | Tour & activity bookings | Medium |
-| **E-book / PDF guide** | Paid downloadable guide | Low (phase 2) |
-| **Sponsored newsletter** | Ads in mailing | Low (phase 2) |
+All destinations use **hierarchical pages** (parent/child) so WordPress
+generates proper URLs and breadcrumbs automatically.
+
+```
+bestofcalabria.com/                         ← Homepage
+├── destinations/                           ← Hub: all destinations
+│   ├── reggio-calabria/                    ← City overview
+│   │   ├── bronzi-di-riace/               ← Attraction
+│   │   ├── museo-nazionale/               ← Attraction
+│   │   ├── lungomare/                     ← Attraction
+│   │   ├── arena-dello-stretto/           ← Attraction
+│   │   └── where-to-eat-reggio/           ← Practical subpage
+│   ├── tropea/
+│   │   ├── santa-maria-dell-isola/
+│   │   ├── tropea-beaches/
+│   │   ├── red-onion-festival/
+│   │   └── where-to-eat-tropea/
+│   ├── scilla/
+│   │   ├── chianalea/
+│   │   ├── castello-ruffo/
+│   │   ├── swordfish-tradition/
+│   │   └── scilla-beaches/
+│   ├── pizzo/
+│   │   ├── piedigrotta-church/
+│   │   ├── tartufo-gelato/
+│   │   └── castello-murat/
+│   ├── bova/
+│   │   ├── grecanico-heritage/
+│   │   └── what-to-see-bova/
+│   ├── gerace/
+│   │   ├── norman-cathedral/
+│   │   └── medieval-old-town/
+│   ├── stilo/
+│   │   └── cattolica-di-stilo/
+│   ├── cosenza/
+│   │   ├── old-town/
+│   │   ├── mab-museum/
+│   │   └── teatro-rendano/
+│   ├── catanzaro/
+│   │   └── belvedere-viewpoints/
+│   └── locri/
+│       └── locri-epizefiri/
+├── nature/                                 ← Hub: nature & outdoors
+│   ├── aspromonte/
+│   │   ├── trekking-routes/
+│   │   ├── waterfalls/
+│   │   └── villages/
+│   ├── sila/
+│   │   ├── lake-arvo/
+│   │   └── sila-winter/
+│   ├── pollino/
+│   │   ├── rafting/
+│   │   └── pino-loricato/
+│   ├── costa-viola/
+│   ├── capo-vaticano/
+│   └── beaches/
+│       ├── best-beaches-tyrrhenian/
+│       └── best-beaches-ionian/
+├── cuisine/                                ← Hub: food & drink
+│   ├── nduja/
+│   ├── bergamot/
+│   ├── fileja-pasta/
+│   ├── pesce-spada/
+│   ├── calabrian-wine/
+│   ├── street-food/
+│   ├── products/
+│   └── restaurants/
+├── culture/                                ← Hub: history & traditions
+│   ├── magna-graecia/
+│   ├── byzantine-heritage/
+│   ├── traditions-festivals/
+│   ├── grecanico-language/
+│   └── crafts-ceramics/
+├── practical/                              ← Hub: travel planning
+│   ├── getting-there/
+│   ├── car-rental/
+│   ├── accommodation/
+│   ├── weather-best-time/
+│   ├── safety/
+│   ├── itinerary-3-days/
+│   ├── itinerary-7-days/
+│   └── itinerary-14-days/
+├── blog/                                   ← Blog posts (category-based)
+├── about/
+├── contact/
+├── privacy-policy/
+└── partnership/
+```
 
 ---
 
-## Tech stack
+## Page Template Strategy (GeneratePress)
 
-| Layer | Technology | Why |
-|-------|------------|-----|
-| CMS | **WordPress 6.4+** | Easy content management, plugin ecosystem |
-| Theme | **Custom block theme (FSE)** | Full control, modern editing |
-| Multilingual | **Polylang** | Free, /en/ + /pl/ subdirectories |
-| SEO | **Yoast SEO / RankMath** | Sitemap, schema, meta tags |
-| Analytics | **Plausible / Umami** | GDPR-friendly, lightweight |
-| Newsletter | **MailerLite** | Free up to 1000 subscribers |
-| Hosting | **Shared hosting + DirectAdmin** | Current setup |
+### City Page (e.g. /destinations/reggio-calabria/)
+
+```
+┌─────────────────────────────────────────────┐
+│ HERO: Full-width image + city name          │
+│ "Reggio Calabria — Capital of Calabria"     │
+├─────────────────────────────────────────────┤
+│ INTRO: 2-3 paragraph overview               │
+│ Quick facts: population, province, airport  │
+├─────────────────────────────────────────────┤
+│ TOP ATTRACTIONS — 3-column card grid:       │
+│ [Bronzi di Riace] [Lungomare] [Museo]       │
+│ Each card → links to child page             │
+├─────────────────────────────────────────────┤
+│ MAP: Embedded Google Map of the city        │
+├─────────────────────────────────────────────┤
+│ PRACTICAL: Getting there, where to stay     │
+│ Booking.com widget / affiliate link         │
+├─────────────────────────────────────────────┤
+│ RELATED: "Nearby destinations"              │
+│ [Scilla - 20 min] [Bova - 45 min]          │
+├─────────────────────────────────────────────┤
+│ NEWSLETTER CTA                              │
+└─────────────────────────────────────────────┘
+```
+
+### Attraction Page (e.g. /destinations/reggio-calabria/bronzi-di-riace/)
+
+```
+┌─────────────────────────────────────────────┐
+│ BREADCRUMB: Home > Destinations > Reggio    │
+│            Calabria > Bronzi di Riace       │
+├─────────────────────────────────────────────┤
+│ HERO IMAGE                                  │
+├─────────────────────────────────────────────┤
+│ ARTICLE CONTENT                             │
+│ - History                                   │
+│ - What to see                               │
+│ - Practical info (hours, tickets, address)  │
+├─────────────────────────────────────────────┤
+│ INFO BOX (sidebar or inline):               │
+│ 📍 Address | 🕐 Hours | 💰 Price | 🌐 Web │
+├─────────────────────────────────────────────┤
+│ "More in Reggio Calabria" → sibling pages   │
+├─────────────────────────────────────────────┤
+│ GetYourGuide widget (affiliate)             │
+└─────────────────────────────────────────────┘
+```
+
+### Hub Page (e.g. /destinations/, /nature/, /cuisine/)
+
+```
+┌─────────────────────────────────────────────┐
+│ HERO: Section title + tagline               │
+├─────────────────────────────────────────────┤
+│ GRID: All child pages as cards with image   │
+│ [Reggio] [Tropea] [Scilla] [Pizzo]         │
+│ [Bova]   [Gerace] [Stilo]  [Cosenza]       │
+├─────────────────────────────────────────────┤
+│ LATEST BLOG POSTS in this category          │
+├─────────────────────────────────────────────┤
+│ NEWSLETTER CTA                              │
+└─────────────────────────────────────────────┘
+```
 
 ---
 
-## Development phases
+## Internal Linking Strategy
 
-### Phase 1 - MVP
-- Homepage with hero, destination grid, latest posts
-- 5-6 destination pages (Reggio, Tropea, Scilla, Pizzo, Bova, Aspromonte)
-- Basic cuisine & practical sections
-- Newsletter signup
-- EN + PL bilingual
-- Responsive design
-- Basic SEO (meta, OG, sitemap, hreflang)
+### Every city page includes:
+1. **Child attraction links** — card grid at top
+2. **"Nearby" section** — links to neighboring cities (with distance)
+3. **Related nature** — e.g., Reggio → Aspromonte
+4. **Related cuisine** — e.g., Pizzo → Tartufo, Reggio → Bergamot
+5. **Practical links** — "How to get to X", "Where to stay in X"
 
-### Phase 2 - Growth
-- 30+ articles across all sections
-- All destination pages complete
-- Itinerary guides (3/7/14 days)
-- Affiliate integration (Booking, car rental, GetYourGuide)
-- Google AdSense
-- Regular blog (2-4 posts/month)
-- Interactive map
+### Linking matrix (key connections):
+| From | To | Context |
+|------|----|---------|
+| Reggio | Scilla | "20 min drive along the coast" |
+| Reggio | Bova | "Day trip to the Greek-speaking mountains" |
+| Reggio | Aspromonte | "The wild mountains behind the city" |
+| Tropea | Pizzo | "30 min north along the coast" |
+| Tropea | Capo Vaticano | "The beaches south of Tropea" |
+| Scilla | Costa Viola | "Part of the Purple Coast" |
+| Pizzo | Tartufo gelato | Cuisine cross-link |
+| Bova | Grecanico language | Culture cross-link |
+| Cosenza | Sila | "Gateway to Sila National Park" |
 
-### Phase 3 - Full monetization
-- E-book / paid guide
-- Sponsored content partnerships
-- Local business directory
-- Italian version (/it/)
-- Social media integration
+---
+
+## Navigation Structure
+
+### Primary Menu (header):
+```
+Destinations ▾        Nature ▾         Cuisine    Culture    Practical ▾    Blog
+├── Reggio Calabria   ├── Aspromonte                        ├── Getting There
+├── Tropea            ├── Sila                              ├── Car Rental
+├── Scilla            ├── Pollino                           ├── Where to Stay
+├── Pizzo             ├── Best Beaches                      └── Itineraries
+├── Bova              └── Capo Vaticano
+├── Gerace
+├── Cosenza
+└── All destinations →
+```
+
+### Footer:
+```
+Column 1: About        Column 2: Top Destinations    Column 3: Plan Your Trip    Column 4: Newsletter
+```
+
+---
+
+## Blog Categories (for /blog/ posts)
+- Destinations
+- Nature & Outdoors
+- Food & Drink
+- Culture & History
+- Travel Tips
+- Hidden Gems
+- Itineraries
+
+---
+
+## Monetization Placement
+
+| Location | Monetization |
+|----------|-------------|
+| City page "Where to Stay" section | Booking.com search widget |
+| City page sidebar/bottom | GetYourGuide tours widget |
+| Practical > Car Rental | DiscoverCars affiliate |
+| Practical > Accommodation | Booking.com affiliate |
+| Blog posts | AdSense (after 2nd heading) |
+| All pages footer area | Newsletter signup (MailerLite) |
+| Cuisine > Restaurants | TripAdvisor affiliate |
+
+---
+
+## Image Requirements
+
+### Per city page:
+- 1x hero (1920×800)
+- 1x per attraction card (800×600)
+- 3-5 inline content photos
+
+### Per attraction page:
+- 1x hero (1920×800)
+- 2-3 content photos
+- 1x info box/map
+
+### Hub pages:
+- 1x hero (1920×600)
+- 1x per card (800×600)
+
+**Sources:** Unsplash, Pexels (free), own photos
+**Format:** WebP preferred, fallback JPEG, max 200KB per image
+
+---
+
+## GeneratePress Setup Notes
+
+### Required plugins:
+- GeneratePress Premium (GP Elements, Colors, Typography, etc.)
+- GenerateBlocks (free) — for advanced layouts
+- RankMath SEO — breadcrumbs, schema, sitemap
+- WP Rocket or LiteSpeed Cache — caching
+- MailerLite — newsletter
+- Polylang — multilingual (EN + PL)
+
+### GP Elements to create:
+1. **Hero Element** — Hook: `after_header`, display on specific pages
+2. **City Attractions Grid** — Hook: `after_content`, display on city pages
+3. **Nearby Destinations** — Hook: `after_content`
+4. **Newsletter CTA** — Hook: `before_footer`
+5. **Booking Widget** — Hook: `after_content`, display on city pages
+
+### Typography:
+- Headings: Playfair Display (or similar serif from GP)
+- Body: Inter / System font stack
+- Load via GP Typography module (no extra plugin needed)
+
+---
+
+## Phase 1 Scope (MVP: ~35 pages)
+
+### Pages to create:
+- 1 Homepage
+- 1 Destinations hub
+- 6 City pages (Reggio, Tropea, Scilla, Pizzo, Bova, Cosenza)
+- 15 Attraction subpages (2-3 per city)
+- 1 Nature hub + 3 nature pages (Aspromonte, Beaches, Capo Vaticano)
+- 1 Cuisine hub + 2 cuisine pages (Nduja, Calabrian Wine)
+- 1 Culture hub
+- 1 Practical hub + 2 practical pages (Getting There, 7-day Itinerary)
+- 4 Static pages (About, Contact, Privacy, Partnership)
+
+### Blog posts (drafts):
+- 10 Reasons to Visit Calabria
+- 7-Day Itinerary
+- What is Nduja?
+- Chianalea: Hidden Little Venice
+- Best Beaches in Calabria
