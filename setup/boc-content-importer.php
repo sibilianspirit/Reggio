@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Best of Calabria - Content Importer
  * Description: Import hierarchical pages, categories, posts. Tools > BOC Import.
- * Version: 3.0.0
+ * Version: 4.0.0
  * Author: SibilianSpirit
  */
 
@@ -15,13 +15,16 @@ add_action( 'admin_menu', function () {
 function boc_import_page() {
 	if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Unauthorized' );
 
-	echo '<div class="wrap"><h1>Best of Calabria — Content Importer v3</h1>';
+	echo '<div class="wrap"><h1>Best of Calabria — Content Importer v4</h1>';
 
 	if ( isset( $_POST['boc_reset'] ) && check_admin_referer( 'boc_nonce' ) ) {
 		boc_reset_content();
 	}
 	if ( isset( $_POST['boc_import'] ) && check_admin_referer( 'boc_nonce' ) ) {
 		boc_run_import();
+	}
+	if ( isset( $_POST['boc_import_pl'] ) && check_admin_referer( 'boc_nonce' ) ) {
+		boc_run_import_pl();
 	}
 
 	// Diagnostics
@@ -40,8 +43,10 @@ function boc_import_page() {
 	wp_nonce_field( 'boc_nonce' );
 	echo '<h2>Step 1: Reset</h2><p>Deletes ALL pages, posts, categories.</p>';
 	echo '<button type="submit" name="boc_reset" value="1" class="button" onclick="return confirm(\'Delete ALL?\')">Reset All Content</button>';
-	echo '<h2 style="margin-top:20px">Step 2: Import</h2><p>Creates ~50 pages, categories, sample posts, configures settings.</p>';
-	echo '<button type="submit" name="boc_import" value="1" class="button button-primary button-hero">Import Content</button>';
+	echo '<h2 style="margin-top:20px">Step 2: Import EN</h2><p>Creates ~50 English pages, categories, sample posts, configures settings.</p>';
+	echo '<button type="submit" name="boc_import" value="1" class="button button-primary button-hero">Import EN Content</button>';
+	echo '<h2 style="margin-top:20px">Step 3: Import PL</h2><p>Creates ~50 Polish pages under /pl/ parent. Run AFTER English import.</p>';
+	echo '<button type="submit" name="boc_import_pl" value="1" class="button button-primary button-hero">Import PL Content</button>';
 	echo '</form></div>';
 }
 
@@ -443,4 +448,359 @@ function boc_run_import() {
 	update_option('permalink_structure','/%postname%/');
 	flush_rewrite_rules();
 	echo "Settings configured\n\nDONE! " . count(get_posts(array('post_type'=>'page','numberposts'=>-1))) . " pages created.\n</pre>";
+}
+
+// ═══════════════════════════════════════════════════════════════
+// POLISH CONTENT
+// ═══════════════════════════════════════════════════════════════
+
+function boc_run_import_pl() {
+	echo '<pre style="background:#f5f5f5;padding:15px;max-height:500px;overflow:auto">';
+	echo "=== IMPORTING POLISH CONTENT ===\n\n";
+
+	$p = function($title, $slug, $content='', $parent=0) {
+		// For hierarchical pages, build full path for lookup
+		$path = $slug;
+		if ($parent) {
+			$parent_post = get_post($parent);
+			if ($parent_post) {
+				// Build full path by walking up parents
+				$ancestors = array($parent_post->post_name);
+				$current = $parent_post;
+				while ($current->post_parent) {
+					$current = get_post($current->post_parent);
+					if ($current) $ancestors[] = $current->post_name;
+				}
+				$path = implode('/', array_reverse($ancestors)) . '/' . $slug;
+			}
+		}
+		$e = get_page_by_path($path);
+		if ($e) { echo "= {$title} (exists)\n"; return $e->ID; }
+		$id = wp_insert_post(array('post_title'=>$title,'post_name'=>$slug,'post_content'=>$content,
+			'post_status'=>'publish','post_type'=>'page','post_parent'=>$parent));
+		if (is_wp_error($id)) { echo "! {$slug}\n"; return 0; }
+		echo "+ {$title}\n"; return $id;
+	};
+
+	// ═══ PL ROOT ═══
+	echo "--- PL ROOT ---\n";
+	$pl = $p('Strona główna','pl','<h2>Witaj w Best of Calabria</h2>
+<p>Najlepszy przewodnik po południowych Włoszech — najlepiej strzeżonym sekrecie Europy. Odkryj oszałamiające plaże, dzikie góry, starożytne greckie dziedzictwo i najbardziej autentyczną włoską kuchnię.</p>
+
+<h2>Polecane kierunki</h2>
+<p>Poznaj najpiękniejsze miejsca Kalabrii — od klifowego miasteczka Tropea po starożytne ulice Reggio Calabria.</p>
+
+<h3><a href="/pl/kierunki/tropea/">Tropea</a></h3>
+<p>Krystalicznie czysta woda i kultowy kościół Santa Maria dell\'Isola na skalistym cyplu.</p>
+
+<h3><a href="/pl/kierunki/reggio-calabria/">Reggio Calabria</a></h3>
+<p>Dom legendarnych Brązów z Riace i Lungomare — „najpiękniejszy kilometr we Włoszech".</p>
+
+<h3><a href="/pl/kierunki/scilla/">Scilla</a></h3>
+<p>Dzielnica rybacka Chianalea, znana jako „Mała Wenecja Południa".</p>
+
+<h3><a href="/pl/kierunki/pizzo/">Pizzo</a></h3>
+<p>Ojczyzna lodów tartufo i tajemniczy kościół wykuty w skale.</p>
+
+<h2>Przeglądaj według kategorii</h2>
+<ul>
+<li><a href="/pl/kierunki/">Wszystkie kierunki</a> — Miasta, miasteczka i wioski</li>
+<li><a href="/pl/natura/">Natura i przyroda</a> — Parki narodowe, plaże, góry</li>
+<li><a href="/pl/kuchnia/">Kuchnia kalabryjska</a> — Jedzenie, wino, przepisy</li>
+<li><a href="/pl/kultura/">Kultura i historia</a> — 3000 lat dziedzictwa</li>
+<li><a href="/pl/praktyczne/">Zaplanuj podróż</a> — Dojazd, noclegi, plan podróży</li>
+</ul>');
+
+	// ═══ KIERUNKI (DESTINATIONS) ═══
+	echo "\n--- KIERUNKI ---\n";
+	$dest = $p('Kierunki','kierunki','<p>Od starożytnych greckich kolonii po klifowe wioski nad turkusową wodą — odkryj najlepsze miejsca, jakie Kalabria ma do zaoferowania.</p>
+
+<h2>Wybrzeże Tyrreńskie</h2>
+<ul>
+<li><a href="/pl/kierunki/tropea/">Tropea</a> — Perła wybrzeża tyrreńskiego</li>
+<li><a href="/pl/kierunki/pizzo/">Pizzo</a> — Ojczyzna lodów tartufo</li>
+<li><a href="/pl/kierunki/scilla/">Scilla</a> — Mitologiczna wioska rybacka Homera</li>
+</ul>
+
+<h2>Metropolia Reggio</h2>
+<ul>
+<li><a href="/pl/kierunki/reggio-calabria/">Reggio Calabria</a> — Stolica, Brązy z Riace</li>
+<li><a href="/pl/kierunki/bova/">Bova</a> — Greckojęzyczna wioska górska</li>
+</ul>
+
+<h2>Interior i wybrzeże jońskie</h2>
+<ul>
+<li><a href="/pl/kierunki/gerace/">Gerace</a> — Normandzka katedra, średniowieczne miasto</li>
+<li><a href="/pl/kierunki/stilo/">Stilo</a> — Bizantyjska Cattolica</li>
+<li><a href="/pl/kierunki/cosenza/">Cosenza</a> — Ateny Kalabrii</li>
+<li><a href="/pl/kierunki/catanzaro/">Catanzaro</a> — Stolica regionu</li>
+<li><a href="/pl/kierunki/locri/">Locri</a> — Starożytne greckie stanowisko archeologiczne</li>
+</ul>', $pl);
+
+	// ─── Reggio Calabria + atrakcje ───
+	$reggio = $p('Reggio Calabria','reggio-calabria','<p>Stolica obszaru metropolitalnego Kalabrii leży na samym czubku włoskiego buta, oddzielona od Sycylii wąską Cieśniną Mesyńską. Dom słynnych na cały świat Brązów z Riace i jednego z najpiękniejszych nadmorskich deptaków we Włoszech.</p>
+
+<h2>Główne atrakcje</h2>
+<ul>
+<li><a href="/pl/kierunki/reggio-calabria/bronzy-z-riace/">Brązy z Riace</a> — Dwaj legendarni greccy wojownicy z brązu</li>
+<li><a href="/pl/kierunki/reggio-calabria/lungomare/">Lungomare Falcomata</a> — „Najpiękniejszy kilometr we Włoszech"</li>
+<li><a href="/pl/kierunki/reggio-calabria/museo-nazionale/">Museo Nazionale della Magna Grecia</a></li>
+<li><a href="/pl/kierunki/reggio-calabria/arena-dello-stretto/">Arena dello Stretto</a></li>
+</ul>
+
+<h2>Jak dojechać</h2>
+<p>Reggio Calabria ma własne lotnisko (REG) z lotami krajowymi. Miasto jest również połączone szybkimi pociągami i autostradą A2. Promy do Mesyny (Sycylia) kursują co 20 minut.</p>
+
+<h2>W pobliżu</h2>
+<ul>
+<li><a href="/pl/kierunki/scilla/">Scilla</a> — 20 min jazdy wzdłuż wybrzeża</li>
+<li><a href="/pl/kierunki/bova/">Bova</a> — 45 min w góry Aspromonte</li>
+<li><a href="/pl/natura/aspromonte/">Park Narodowy Aspromonte</a> — Dzikie góry za miastem</li>
+</ul>', $dest);
+
+	$p('Brązy z Riace','bronzy-z-riace','<p>Brązy z Riace to dwa pełnowymiarowe greckie posągi z brązu przedstawiające nagich wojowników, odlane około 450 r. p.n.e. Odkryte przez nurka-amatora w Morzu Jońskim koło Riace w 1972 roku, uważane są za jedne z najwspanialszych przykładów starożytnej rzeźby greckiej.</p>
+
+<h2>Historia</h2>
+<p>Posągi zostały prawdopodobnie wyrzucone za burtę ze statku rzymskiego, być może podczas burzy, w trakcie transportu z Grecji do Rzymu. Spędziły ponad 2000 lat na dnie morskim przed przypadkowym odkryciem.</p>
+
+<h2>Co zobaczyć</h2>
+<p>Brązy eksponowane są w specjalnym klimatyzowanym pomieszczeniu w Museo Nazionale della Magna Grecia. Mając prawie 2 metry wysokości, przedstawiają młodszego i starszego wojownika z niezwykłym detalem anatomicznym.</p>
+
+<h2>Informacje praktyczne</h2>
+<p><strong>Lokalizacja:</strong> Museo Nazionale della Magna Grecia, Piazza De Nava, Reggio Calabria<br>
+<strong>Godziny:</strong> Wt-Nd 9:00-20:00 (zamknięte w poniedziałki)<br>
+<strong>Bilety:</strong> 8€ normalny, 4€ ulgowy<br>
+<strong>Strona:</strong> museoarcheologicoreggiocalabria.it</p>
+
+<p><a href="/pl/kierunki/reggio-calabria/">← Powrót do Reggio Calabria</a></p>', $reggio);
+
+	$p('Lungomare Falcomata','lungomare','<p>Lungomare Falcomata to oszałamiający nadmorski deptak Reggio Calabria, rozciągający się na ponad kilometr wzdłuż Cieśniny Mesyńskiej. Włoski poeta Gabriele D\'Annunzio nazwał go „najpiękniejszym kilometrem we Włoszech" — i trudno się z tym nie zgodzić.</p>
+
+<h2>Co zobaczyć</h2>
+<p>Spaceruj deptakiem z widokiem na Etnę i Sycylię po drugiej stronie cieśniny. O zachodzie słońca światło tworzy słynny miraż „Fata Morgana". Po drodze znajdziesz budynki secesyjne, rzeźby, egzotyczne rośliny i kilka kawiarni.</p>
+
+<p><a href="/pl/kierunki/reggio-calabria/">← Powrót do Reggio Calabria</a></p>', $reggio);
+
+	$p('Museo Nazionale della Magna Grecia','museo-nazionale','<p>Jedno z najważniejszych muzeów archeologicznych we Włoszech, mieszczące niezwykłą kolekcję artefaktów z greckich kolonii Magna Graecia. Główną atrakcją są Brązy z Riace.</p>
+
+<h2>Informacje praktyczne</h2>
+<p><strong>Adres:</strong> Piazza De Nava 26, Reggio Calabria<br>
+<strong>Godziny:</strong> Wt-Nd 9:00-20:00<br>
+<strong>Bilety:</strong> 8€</p>
+
+<p><a href="/pl/kierunki/reggio-calabria/">← Powrót do Reggio Calabria</a></p>', $reggio);
+
+	$p('Arena dello Stretto','arena-dello-stretto','<p>Nowoczesny amfiteatr na wolnym powietrzu zbudowany na nabrzeżu Reggio Calabria, ze spektakularnymi widokami na Cieśninę Mesyńską i Sycylię. Latem odbywa się tu wiele koncertów i wydarzeń kulturalnych.</p>
+
+<p><a href="/pl/kierunki/reggio-calabria/">← Powrót do Reggio Calabria</a></p>', $reggio);
+
+	// ─── Tropea + atrakcje ───
+	$tropea = $p('Tropea','tropea','<p>Usytuowana na klifie 50 metrów nad Morzem Tyrreńskim, Tropea jest najbardziej ikonicznym kierunkiem Kalabrii. Krystalicznie czysta turkusowa woda, dramatyczny kościół Santa Maria dell\'Isola na skalistym cyplu i słynna czerwona cebula — Tropea ma wszystko.</p>
+
+<h2>Główne atrakcje</h2>
+<ul>
+<li><a href="/pl/kierunki/tropea/santa-maria-dell-isola/">Santa Maria dell\'Isola</a> — Kultowy kościół na klifie</li>
+<li><a href="/pl/kierunki/tropea/plaze-tropea/">Plaże Tropea</a> — Biały piasek i turkusowa woda</li>
+<li><a href="/pl/kierunki/tropea/festiwal-czerwonej-cebuli/">Festiwal Czerwonej Cebuli</a> — Słynna cipolla rossa</li>
+</ul>
+
+<h2>W pobliżu</h2>
+<ul>
+<li><a href="/pl/kierunki/pizzo/">Pizzo</a> — 30 min na północ (lody tartufo!)</li>
+<li><a href="/pl/natura/capo-vaticano/">Capo Vaticano</a> — 15 min na południe (top 10 plaż świata)</li>
+</ul>', $dest);
+
+	$p('Santa Maria dell\'Isola','santa-maria-dell-isola','<p>Niekwestionowany symbol Tropei i jeden z najczęściej fotografowanych zabytków Włoch. Ta średniowieczna benedyktyńska świątynia stoi na szczycie dramatycznego skalistego cypla połączonego ze stałym lądem, otoczonego turkusowym Morzem Tyrreńskim.</p>
+
+<h2>Zwiedzanie</h2>
+<p>Wejdź po kamiennych schodach wykutych w skale, by podziwiać panoramiczne widoki. Wnętrze kościoła jest proste i bielone — prawdziwą atrakcją jest otoczenie. Najlepiej fotografować z belwederu Tropei o zachodzie słońca.</p>
+
+<p><a href="/pl/kierunki/tropea/">← Powrót do Tropea</a></p>', $tropea);
+
+	$p('Plaże Tropea','plaze-tropea','<p>Plaże Tropei niezmiennie klasyfikowane są jako jedne z najlepszych we Włoszech. Główna plaża rozciąga się pod klifem starego miasta — drobny biały piasek i krystalicznie czysta turkusowa woda.</p>
+
+<h2>Najlepsze plaże</h2>
+<p><strong>Spiaggia della Rotonda</strong> — Główna plaża pod starym miastem. <strong>Spiaggia del Cannone</strong> — Bardziej odosobniona, obok Isoli. <strong>Mare Piccolo</strong> — Idealna dla rodzin z płytką wodą.</p>
+
+<p><a href="/pl/kierunki/tropea/">← Powrót do Tropea</a></p>', $tropea);
+
+	$p('Festiwal Czerwonej Cebuli','festiwal-czerwonej-cebuli','<p>Czerwona cebula z Tropei (cipolla rossa di Tropea) jest słynna w całych Włoszech ze swojego słodkiego, łagodnego smaku. Co lato miasteczko świętuje Sagra della Cipolla Rossa — festiwal potraw z cebuli, muzyki na żywo i lokalnej kultury.</p>
+
+<p><a href="/pl/kierunki/tropea/">← Powrót do Tropea</a></p>', $tropea);
+
+	// ─── Scilla + atrakcje ───
+	$scilla = $p('Scilla','scilla','<p>Nazwana od mitologicznego potwora morskiego z Odysei Homera, Scilla strzeże północnego wejścia do Cieśniny Mesyńskiej. Jej starożytna dzielnica rybacka Chianalea — „Mała Wenecja Południa" — jest jedną z najbardziej urokliwych okolic we Włoszech.</p>
+
+<h2>Główne atrakcje</h2>
+<ul>
+<li><a href="/pl/kierunki/scilla/chianalea/">Chianalea</a> — Legendarna dzielnica rybacka</li>
+<li><a href="/pl/kierunki/scilla/castello-ruffo/">Castello Ruffo</a> — Średniowieczny zamek z panoramicznymi widokami</li>
+<li><a href="/pl/kierunki/scilla/tradycja-polowu-miecznika/">Tradycja polowu na miecznika</a> — Starożytne dziedzictwo rybackie</li>
+</ul>
+
+<h2>W pobliżu</h2>
+<ul>
+<li><a href="/pl/kierunki/reggio-calabria/">Reggio Calabria</a> — 20 min na południe</li>
+<li><a href="/pl/natura/costa-viola/">Costa Viola</a> — Purpurowe Wybrzeże ciągnie się na północ</li>
+</ul>', $dest);
+
+	$p('Chianalea','chianalea','<p>Chianalea to starożytna dzielnica rybacka Scilli, gdzie kolorowe domy zbudowane są bezpośrednio na skałach, a morze obmywa ich fundamenty. Wąskie uliczki, łodzie rybackie na maleńkich plażach i zapach grillowanego miecznika — to są prawdziwe, niezmienione Włochy.</p>
+
+<p>Nazwa oznacza „płaską wodę" w lokalnym dialekcie, nawiązując do spokojnych wód małej zatoczki. Restauracje serwują to, co złowiono tego ranka. Przyjdź o zachodzie słońca na niezapomniane widoki przez Cieśninę na Sycylię.</p>
+
+<p><a href="/pl/kierunki/scilla/">← Powrót do Scilla</a></p>', $scilla);
+
+	$p('Castello Ruffo','castello-ruffo','<p>Usytuowany na skalistym cyplu między Chianaleą a główną plażą, Castello Ruffo strzeże Cieśniny Mesyńskiej od V wieku. Dziś mieści wystawy i oferuje panoramiczne widoki na Kalabrię, Sycylię i Wyspy Liparyjskie.</p>
+
+<p><a href="/pl/kierunki/scilla/">← Powrót do Scilla</a></p>', $scilla);
+
+	$p('Tradycja polowu na miecznika','tradycja-polowu-miecznika','<p>Scilla ma wielowiekową tradycję polowania na mieczniki w Cieśninie Mesyńskiej. Rybacy nadal używają tradycyjnych „passerelle" — wysokich wież obserwacyjnych na łodziach — do wypatrywania ryb. Coroczna Sagra del Pesce Spada świętuje to dziedzictwo, serwując świeżego miecznika na każdy możliwy sposób.</p>
+
+<p><a href="/pl/kierunki/scilla/">← Powrót do Scilla</a></p>', $scilla);
+
+	// ─── Pizzo + atrakcje ───
+	$pizzo = $p('Pizzo','pizzo','<p>To urokliwe nadmorskie miasteczko nad Zatoką Sant\'Eufemia jest ojczyzną tartufo — najsłynniejszych włoskich lodów. Poza lodami Pizzo oferuje tajemniczy skalny kościół Piedigrotta i malownicze centrum historyczne.</p>
+
+<h2>Główne atrakcje</h2>
+<ul>
+<li><a href="/pl/kierunki/pizzo/kosciol-piedigrotta/">Kościół Piedigrotta</a> — Wykuty w całości w skale</li>
+<li><a href="/pl/kierunki/pizzo/tartufo-gelato/">Lody Tartufo</a> — Oryginał, tu się narodziły</li>
+<li><a href="/pl/kierunki/pizzo/castello-murat/">Castello Murat</a> — Gdzie generał Napoleona spotkał swój koniec</li>
+</ul>', $dest);
+
+	$p('Kościół Piedigrotta','kosciol-piedigrotta','<p>Kościół wykuty w całości z tufu przez rozbitków w XVII wieku. Wewnątrz naturalnej wielkości kamienne figury przedstawiają sceny biblijne w podziemnej grocie nad morzem. Jedno z najbardziej unikalnych i tajemniczych miejsc Kalabrii.</p>
+
+<p><a href="/pl/kierunki/pizzo/">← Powrót do Pizzo</a></p>', $pizzo);
+
+	$p('Lody Tartufo','tartufo-gelato','<p>Tartufo di Pizzo zostało wynalezione tutaj w latach 50. w Bar Dante na głównym placu. To kula lodów orzechowo-czekoladowych z płynnym czekoladowym środkiem, oprószona kakao. Dziś słynne na całym świecie, ale nic nie pobije jedzenia oryginału na Piazza della Repubblica z widokiem na morze.</p>
+
+<p><a href="/pl/kierunki/pizzo/">← Powrót do Pizzo</a></p>', $pizzo);
+
+	$p('Castello Murat','castello-murat','<p>Ten XV-wieczny aragońsko zamek to miejsce, gdzie Joachim Murat, szwagier Napoleona i król Neapolu, został schwytany i stracony w 1815 roku po nieudanej próbie odzyskania tronu. Zamek mieści obecnie muzeum o Muracie i oferuje widoki na morze.</p>
+
+<p><a href="/pl/kierunki/pizzo/">← Powrót do Pizzo</a></p>', $pizzo);
+
+	// ─── Bova ───
+	$bova = $p('Bova','bova','<p>Jedna z włoskich „Borghi più belli" (najpiękniejszych wiosek), Bova jest kulturalną stolicą Grekaników — potomków starożytnych greckich osadników, którzy nadal mówią w Griko, języku wywodzącym się ze starożytnej greki. Położona na wysokości 820 m n.p.m. u podnóża Aspromonte, to żywe muzeum dziedzictwa Magna Graecia.</p>
+
+<h2>Co zobaczyć</h2>
+<ul>
+<li><a href="/pl/kierunki/bova/dziedzictwo-grekanickie/">Dziedzictwo grekaniczne</a> — Żywa tradycja grecka</li>
+</ul>
+
+<h2>W pobliżu</h2>
+<ul>
+<li><a href="/pl/kierunki/reggio-calabria/">Reggio Calabria</a> — 45 min jazdy</li>
+<li><a href="/pl/natura/aspromonte/">Aspromonte</a> — Już tu jesteś</li>
+</ul>', $dest);
+
+	$p('Dziedzictwo grekaniczne','dziedzictwo-grekanickie','<p>Grekanici to ostatni potomkowie greckojęzycznej populacji, która niegdyś zamieszkiwała znaczną część południowej Kalabrii. W Bovie niektórzy starsi mieszkańcy nadal mówią w Griko, a miasteczko świętuje swoje dziedzictwo dwujęzycznymi tablicami, greckimi festiwalami i corocznym festiwalem muzycznym Paleariza.</p>
+
+<p><a href="/pl/kierunki/bova/">← Powrót do Bova</a></p>', $bova);
+
+	// ─── Pozostałe miasta ───
+	$p('Gerace','gerace','<p>Dom największej normandzkiej katedry w Kalabrii, Gerace to doskonale zachowane średniowieczne miasto na skalistym plateau. Labirynt wąskich uliczek kryje bizantyjskie kościoły, szlacheckie pałace i panoramiczne widoki na wybrzeże jońskie.</p>', $dest);
+	$p('Stilo','stilo','<p>Słynne z Cattolica di Stilo — maleńkiego bizantyjskiego kościoła z IX wieku, kandydata na Listę Światowego Dziedzictwa UNESCO. Pięć kopuł wieńczy tę ceglaną budowlę przylegającą do Monte Consolino, reprezentując głęboki wpływ Bizancjum na kulturę Kalabrii.</p>', $dest);
+	$cosenza = $p('Cosenza','cosenza','<p>„Ateny Kalabrii" — miasto uniwersyteckie, gdzie pulsujące starówka łączy się ze współczesną kulturą. Centro storico wzdłuż rzeki Crati to jeden z najlepiej zachowanych średniowiecznych ośrodków w południowych Włoszech. Nie przegap otwartego muzeum MAB i wspaniałego teatru Telesio.</p>
+
+<h2>W pobliżu</h2>
+<ul>
+<li><a href="/pl/natura/sila/">Park Narodowy Sila</a> — Brama do wielkiego lasu</li>
+</ul>', $dest);
+	$p('Catanzaro','catanzaro','<p>Stolica regionu Kalabria leży na wzgórzu między Morzem Tyrreńskim a Jońskim. Znana ze spektakularnych punktów widokowych, wielowiekowej tradycji tkactwa jedwabiu i jako brama na piękne wybrzeże jońskie.</p>', $dest);
+	$p('Locri','locri','<p>Dom stanowiska archeologicznego Locri Epizefiri, jednej z najważniejszych greckich kolonii w Magna Graecia. Założone w VII w. p.n.e., ruiny obejmują grecki teatr, świątynie i muzeum z niezwykłymi terakotowymi artefaktami.</p>', $dest);
+
+	// ═══ NATURA ═══
+	echo "\n--- NATURA ---\n";
+	$nature = $p('Natura','natura','<p>Trzy parki narodowe, 800 km linii brzegowej, dzikie góry i dziewicze plaże — Kalabria to raj dla miłośników przyrody.</p>
+<ul>
+<li><a href="/pl/natura/aspromonte/">Park Narodowy Aspromonte</a></li>
+<li><a href="/pl/natura/sila/">Park Narodowy Sila</a></li>
+<li><a href="/pl/natura/pollino/">Park Narodowy Pollino</a></li>
+<li><a href="/pl/natura/plaze/">Najlepsze plaże</a></li>
+<li><a href="/pl/natura/capo-vaticano/">Capo Vaticano</a></li>
+<li><a href="/pl/natura/costa-viola/">Costa Viola</a></li>
+</ul>', $pl);
+
+	$p('Park Narodowy Aspromonte','aspromonte','<p>Dzikie góry na czubku włoskiego buta. Pradawne lasy, dramatyczne wodospady jak Cascate di Maesano i ostatnie greckojęzyczne wioski. Aspromonte oznacza „biała góra" — a jej szczyty sięgają prawie 2000 m n.p.m.</p>', $nature);
+	$p('Park Narodowy Sila','sila','<p>„Wielki Las Włoch" — rozległe górskie płaskowyże, krystalicznie czyste jeziora (Arvo, Ampollino, Cecita) i najlepsze w Kalabrii narty zimą. Latem piesze wędrówki przez wielowiekowe lasy sosny czarnej.</p>', $nature);
+	$p('Park Narodowy Pollino','pollino','<p>Największy park narodowy we Włoszech, dzielony z Bazylikatą. Dom pradawnej sosny bośniackiej (Pino Loricato), dramatycznych kanionów i światowej klasy raftingu na rzece Lao.</p>', $nature);
+	$p('Najlepsze plaże','plaze','<p>Przewodnik po najlepszych plażach Kalabrii — od białego piasku Tropei po dzikie jońskie wybrzeża.</p>
+<h2>Wybrzeże tyrreńskie (zachód)</h2>
+<p>Tropea, Capo Vaticano, Pizzo, Scilla — turkusowa woda, dramatyczne klify.</p>
+<h2>Wybrzeże jońskie (wschód)</h2>
+<p>Długie piaszczyste plaże, mniej tłumów, cieplejsza woda. Soverato, Le Castella, Capo Rizzuto.</p>', $nature);
+	$p('Capo Vaticano','capo-vaticano','<p>Granitowe klify opadające do krystalicznie czystej wody. Uznawane za jedną z 10 najlepszych plaż na świecie. 15 minut na południe od Tropei, z ukrytymi zatoczkami dostępnymi łodzią lub stromymi ścieżkami.</p>', $nature);
+	$p('Costa Viola','costa-viola','<p>„Purpurowe Wybrzeże" od Scilli do Palmi — dramatyczne klify, ukryte zatoczki i legendarne zachody słońca nad Wyspami Liparyjskimi. Nazwa pochodzi od fioletowych odcieni, jakie morze przybiera o zachodzie słońca.</p>', $nature);
+
+	// ═══ KUCHNIA ═══
+	echo "\n--- KUCHNIA ---\n";
+	$cuisine = $p('Kuchnia kalabryjska','kuchnia','<p>Kuchnia kalabryjska jest odważna, pikantna i głęboko zakorzeniona w tradycji. Od ognistej \'nduja po świeżego miecznika, ręcznie robiony makaron i bergamotkę najwyższej klasy.</p>
+<ul>
+<li><a href="/pl/kuchnia/nduja/">\'Nduja</a> — Słynna pikantna pasta</li>
+<li><a href="/pl/kuchnia/bergamotka/">Bergamotka</a> — Unikalny cytrus Kalabrii</li>
+<li><a href="/pl/kuchnia/wino-kalabryjskie/">Wino kalabryjskie</a></li>
+<li><a href="/pl/kuchnia/makaron-fileja/">Makaron Fileja</a></li>
+<li><a href="/pl/kuchnia/street-food/">Street Food</a></li>
+</ul>', $pl);
+
+	$p('\'Nduja','nduja','<p>Ognista, smarowalna salami wieprzowa ze Spilingi. Robiona z wieprzowiny i hojnej porcji kalabryjskiego peperoncino, \'nduja podbiła świat kulinarny. Smaruj na chlebie, rozpuszczaj w makaronie lub dodawaj do pizzy.</p>', $cuisine);
+	$p('Bergamotka','bergamotka','<p>95% światowej bergamotki rośnie na wąskim pasie wzdłuż jońskiego wybrzeża Kalabrii koło Reggio. Ten unikalny cytrus używany jest w herbacie Earl Grey, perfumach i kuchni kalabryjskiej — od marmolady po likier bergamotkowy.</p>', $cuisine);
+	$p('Wino kalabryjskie','wino-kalabryjskie','<p>Tradycja winiarska Kalabrii sięga czasów greckich. Kluczowe odmiany: Ciro (najstarsze DOC we Włoszech), Greco di Bianco (starożytne wino deserowe), Gaglioppo (główna czerwona odmiana). Nowi producenci umieszczają kalabryjskie wino na mapie świata.</p>', $cuisine);
+	$p('Makaron Fileja','makaron-fileja','<p>Ręcznie robiony makaron formowany przez skręcanie ciasta wokół cienkiego patyczka. Typowo podawany z ragù z \'nduja, sosem z kozy lub prostym sosem pomidorowym z ricottą salatą. Kalabryjska specjalność, której nie znajdziesz nigdzie indziej.</p>', $cuisine);
+	$p('Street Food','street-food','<p>Tartufo di Pizzo (oryginał!), zeppole (smażone ciasto), grattachecca (granita), cudduraci (wielkanocne ciastka) i oczywiście świeże arancini. Scena street food Kalabrii jest bezpretensjonalna i pyszna.</p>', $cuisine);
+
+	// ═══ KULTURA ═══
+	echo "\n--- KULTURA ---\n";
+	$culture = $p('Kultura i historia','kultura','<p>Od Magna Graecia po Normanów, od bizantyjskich kościołów po żywe greckojęzyczne społeczności — kultura Kalabrii ma 3000 lat głębokości.</p>
+<ul>
+<li><a href="/pl/kultura/magna-graecia/">Magna Graecia</a></li>
+<li><a href="/pl/kultura/dziedzictwo-bizantyjskie/">Dziedzictwo bizantyjskie</a></li>
+<li><a href="/pl/kultura/tradycje-i-festiwale/">Tradycje i festiwale</a></li>
+</ul>', $pl);
+
+	$p('Magna Graecia','magna-graecia','<p>Od VIII w. p.n.e. greccy koloniści zakładali miasta na terenie południowej Kalabrii — Rhegion (Reggio), Kroton (Crotone), Locri, Sybaris. Ich dziedzictwo żyje w archeologii, języku i kulturze.</p>', $culture);
+	$p('Dziedzictwo bizantyjskie','dziedzictwo-bizantyjskie','<p>Po upadku Rzymu Kalabria stała się bastionem kultury bizantyjskiej na wieki. Cattolica di Stilo, greckie klasztory Aspromonte i Codex Purpureus Rossanensis są świadectwem tego dziedzictwa.</p>', $culture);
+	$p('Tradycje i festiwale','tradycje-i-festiwale','<p>Varia di Palmi (dziedzictwo UNESCO), Festa della Madonna della Consolazione w Reggio, festiwal muzyki greckiej Paleariza w Bovie i niezliczone sagre (festiwale kulinarne) przez całe lato.</p>', $culture);
+
+	// ═══ INFORMACJE PRAKTYCZNE ═══
+	echo "\n--- PRAKTYCZNE ---\n";
+	$practical = $p('Informacje praktyczne','praktyczne','<p>Wszystko, czego potrzebujesz, żeby zaplanować podróż do Kalabrii.</p>
+<ul>
+<li><a href="/pl/praktyczne/jak-dojechac/">Jak dojechać</a> — Loty, pociągi, promy</li>
+<li><a href="/pl/praktyczne/wynajem-samochodu/">Wynajem samochodu</a> — Niezbędny do zwiedzania</li>
+<li><a href="/pl/praktyczne/noclegi/">Noclegi</a></li>
+<li><a href="/pl/praktyczne/plan-7-dni/">Plan na 7 dni</a></li>
+</ul>', $pl);
+
+	$p('Jak dojechać','jak-dojechac','<p><strong>Samolotem:</strong> Lamezia Terme (SUF) to główne lotnisko z lotami międzynarodowymi. Reggio Calabria (REG) ma połączenia krajowe. <strong>Pociągiem:</strong> Szybkie pociągi docierają do Lamezia i Reggio. <strong>Promem:</strong> Regularne promy z Sycylii (Mesyna) do Reggio i Villa San Giovanni.</p>', $practical);
+	$p('Wynajem samochodu','wynajem-samochodu','<p>Samochód jest niezbędny do porządnego zwiedzania Kalabrii. Transport publiczny istnieje, ale jest ograniczony. Wypożycz na lotnisku Lamezia, by uzyskać najlepsze ceny. Drogi są dobre wzdłuż wybrzeża; górskie drogi mogą być kręte, ale malownicze.</p>', $practical);
+	$p('Noclegi','noclegi','<p>Opcje od luksusowych hoteli nadmorskich po agriturismi (gospodarstwa agroturystyczne) w górach. Najlepsze rejony: wybrzeże Tropei na plaże, Reggio na życie miejskie, Aspromonte na przyrodę. Budżet: 50-100€/noc za dobrej jakości noclegi.</p>', $practical);
+	$p('Plan na 7 dni','plan-7-dni','<p><strong>Dzień 1-2: Tropea i Capo Vaticano</strong> — Klifowe miasteczko, światowej klasy plaże.</p>
+<p><strong>Dzień 3: Pizzo</strong> — Lody tartufo, skalny kościół Piedigrotta.</p>
+<p><strong>Dzień 4: Scilla</strong> — Wioska rybacka Chianalea, zachód słońca nad Sycylią.</p>
+<p><strong>Dzień 5: Reggio Calabria</strong> — Brązy z Riace, Lungomare.</p>
+<p><strong>Dzień 6: Aspromonte i Bova</strong> — Dzikie góry, greckojęzyczna wioska.</p>
+<p><strong>Dzień 7: Gerace i wybrzeże jońskie</strong> — Normandzka katedra, piaszczyste plaże.</p>', $practical);
+
+	// ═══ STRONY STATYCZNE ═══
+	echo "\n--- STATYCZNE ---\n";
+	$p('Blog','blog-pl','', $pl);
+	$p('O nas','o-nas','<p>Best of Calabria to najlepszy polskojęzyczny przewodnik po Kalabrii, południowych Włoszech. Opisujemy kierunki podróży, przyrodę, kuchnię, kulturę i praktyczne informacje dla podróżnych.</p>', $pl);
+	$p('Kontakt','kontakt','<p>Pytania, sugestie lub współpraca? Napisz do nas: hello@bestofcalabria.com</p>', $pl);
+	$p('Polityka prywatności','polityka-prywatnosci','', $pl);
+	$p('Współpraca','wspolpraca','<p>Oferujemy możliwości współpracy dla hoteli, biur podróży, restauracji i lokalnych firm w Kalabrii. Kontakt: partners@bestofcalabria.com</p>', $pl);
+
+	// ═══ POLSKIE KATEGORIE ═══
+	echo "\n--- KATEGORIE PL ---\n";
+	$mk_cat = function($n,$s) { $e=get_term_by('slug',$s,'category'); if($e) return $e->term_id;
+		$r=wp_insert_term($n,'category',array('slug'=>$s)); if(is_wp_error($r)) return 0;
+		echo "+ cat: {$n}\n"; return $r['term_id']; };
+	$mk_cat('Kierunki','kierunki-pl'); $mk_cat('Przyroda','przyroda-pl');
+	$mk_cat('Jedzenie i picie','jedzenie-picie-pl'); $mk_cat('Kultura','kultura-pl');
+	$mk_cat('Porady podróżne','porady-podrozne-pl'); $mk_cat('Ukryte perły','ukryte-perly-pl');
+	$mk_cat('Trasy','trasy-pl');
+
+	$total = count(get_posts(array('post_type'=>'page','numberposts'=>-1)));
+	echo "\nGOTOWE! Łącznie {$total} stron w serwisie.\n</pre>";
 }
