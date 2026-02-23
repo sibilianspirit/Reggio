@@ -1,7 +1,28 @@
 /* ================================================================
-   BOC PAGE BOXES v2 — editorial / magazine style
+   BOC PAGE BOXES v3 — editorial / magazine style
    Customize > Additional CSS
    ================================================================ */
+
+/* ── WordPress wpautop fix ──────────────────────────────
+   WP auto-inserts <p> and <br> between HTML elements.
+   Hide them inside our custom box containers.
+   ─────────────────────────────────────────────────────── */
+.boc-cards-grid > p,
+.boc-cards-grid > br,
+.boc-transport-grid > p,
+.boc-transport-grid > br,
+.boc-nearby-grid > p,
+.boc-nearby-grid > br,
+.boc-info-box > p,
+.boc-info-box > br,
+.boc-faq-box > p,
+.boc-faq-box > br {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 0 !important;
+  line-height: 0 !important;
+}
 
 /* ── Nagłówki sekcji ─────────────────────────────────── */
 .boc-section-title {
@@ -268,6 +289,156 @@
 }
 .boc-faq-box details > div p { margin: 0.5rem 0 0; }
 
+/* ── Typografia artykułu ─────────────────────────────── */
+
+/* Kontener artykułu — GeneratePress selectors */
+.inside-article .entry-content {
+  font-size: 1.06rem;
+  line-height: 1.8;
+  color: #3D3A36;
+}
+
+/* Nagłówki h2 w artykule — linia dekoracyjna */
+.inside-article .entry-content h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0F2E42;
+  margin: 3rem 0 1.2rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #C8B99A;
+}
+
+/* Pierwszy h2 — mniejszy top margin */
+.inside-article .entry-content h2:first-child {
+  margin-top: 0;
+}
+
+/* Nagłówki h3 */
+.inside-article .entry-content h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1B4D6E;
+  margin: 2rem 0 0.8rem;
+  letter-spacing: 0.01em;
+}
+
+/* Akapity */
+.inside-article .entry-content > p {
+  margin-bottom: 1.3rem;
+}
+
+/* Drop cap — pierwszy akapit artykułu */
+.inside-article .entry-content > p:first-of-type::first-letter {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.4rem;
+  font-weight: 700;
+  color: #1B4D6E;
+  float: left;
+  line-height: 0.85;
+  margin: 0.05em 0.12em 0 0;
+  padding: 0;
+}
+
+/* Linki w artykule */
+.inside-article .entry-content a:not([class]) {
+  color: #1B4D6E;
+  text-decoration: underline;
+  text-decoration-color: #C8B99A;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
+  transition: text-decoration-color 0.2s;
+}
+.inside-article .entry-content a:not([class]):hover {
+  text-decoration-color: #1B4D6E;
+}
+
+/* Blockquote — cytat wyróżniony */
+.inside-article .entry-content blockquote {
+  margin: 2rem 0;
+  padding: 1.2rem 1.5rem 1.2rem 1.8rem;
+  border-left: 3px solid #C8B99A;
+  background: #FAF8F5;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  color: #5A524A;
+  line-height: 1.7;
+}
+.inside-article .entry-content blockquote p {
+  margin: 0;
+}
+
+/* Listy w artykule */
+.inside-article .entry-content ul,
+.inside-article .entry-content ol {
+  margin: 1.2rem 0;
+  padding-left: 1.4rem;
+}
+.inside-article .entry-content li {
+  margin-bottom: 0.5rem;
+  line-height: 1.7;
+}
+.inside-article .entry-content ul li::marker {
+  color: #C8B99A;
+}
+.inside-article .entry-content ol li::marker {
+  color: #1B4D6E;
+  font-weight: 600;
+}
+
+/* Separator — hr */
+.inside-article .entry-content hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #D6CFC5 20%, #D6CFC5 80%, transparent);
+  margin: 2.5rem 0;
+}
+
+/* Obrazki w artykule */
+.inside-article .entry-content img {
+  border-radius: 4px;
+}
+.inside-article .entry-content .wp-caption {
+  margin: 1.5rem 0;
+}
+.inside-article .entry-content figcaption,
+.inside-article .entry-content .wp-caption-text {
+  font-size: 0.8rem;
+  color: #9A8E82;
+  font-style: italic;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* Nagłówek strony (tytuł) */
+.inside-article .entry-header h1.entry-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #0F2E42;
+  line-height: 1.3;
+  margin-bottom: 0.3rem;
+}
+
+/* Subtitel / lead pod tytułem (opcjonalny akapit z klasą .boc-lead) */
+.inside-article .entry-content .boc-lead {
+  font-size: 1.15rem;
+  color: #5A524A;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #E0D8CE;
+}
+.inside-article .entry-content .boc-lead::first-letter {
+  font-size: inherit;
+  float: none;
+  font-family: inherit;
+  color: inherit;
+  margin: 0;
+}
+
 /* ── Responsive ───────────────────────────────────────── */
 @media (max-width: 768px) {
   .boc-transport-grid {
@@ -287,6 +458,30 @@
     border-bottom: 1px solid #E0D8CE;
   }
   .boc-nearby-pill:last-child {
+    border-bottom: none;
+  }
+  /* Artykuł na mobile */
+  .inside-article .entry-content h2 {
+    font-size: 1.3rem;
+    margin-top: 2rem;
+  }
+  .inside-article .entry-content > p:first-of-type::first-letter {
+    font-size: 2.8rem;
+  }
+  .inside-article .entry-header h1.entry-title {
+    font-size: 1.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .boc-transport-grid {
+    grid-template-columns: 1fr;
+  }
+  .boc-transport-item {
+    border-right: none;
+    border-bottom: 1px solid #E0D8CE;
+  }
+  .boc-transport-item:last-child {
     border-bottom: none;
   }
 }
