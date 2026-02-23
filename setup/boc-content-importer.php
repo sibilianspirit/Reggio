@@ -70,6 +70,143 @@ function boc_reset_content() {
 	echo "Done.\n</pre>";
 }
 
+// ═══════════════════════════════════════════════════════════════
+// HTML BOX HELPERS
+// ═══════════════════════════════════════════════════════════════
+
+function boc_box_attractions($items) {
+	$html = '<div class="boc-attractions-box">';
+	$html .= '<h2 class="boc-section-title"><span class="boc-icon">🏛️</span> Główne atrakcje</h2>';
+	$html .= '<div class="boc-cards-grid">';
+	foreach ($items as $i => $it) {
+		$html .= '<a href="' . $it['href'] . '" class="boc-attraction-card">';
+		$html .= '<div class="boc-attraction-num">' . ($i+1) . '</div>';
+		$html .= '<div><h3>' . $it['title'] . '</h3>';
+		if (!empty($it['desc'])) $html .= '<p>' . $it['desc'] . '</p>';
+		$html .= '</div></a>';
+	}
+	$html .= '</div></div>';
+	return $html;
+}
+
+function boc_box_transport($items) {
+	$html = '<div class="boc-transport-box">';
+	$html .= '<h2 class="boc-section-title"><span class="boc-icon">🗺️</span> Jak dojechać</h2>';
+	$html .= '<div class="boc-transport-grid">';
+	foreach ($items as $it) {
+		$html .= '<div class="boc-transport-item">';
+		$html .= '<span class="boc-transport-emoji">' . $it['emoji'] . '</span>';
+		$html .= '<strong>' . $it['label'] . '</strong>';
+		$html .= '<p>' . $it['desc'] . '</p>';
+		$html .= '</div>';
+	}
+	$html .= '</div></div>';
+	return $html;
+}
+
+function boc_box_nearby($items) {
+	$html = '<div class="boc-nearby-box">';
+	$html .= '<h2 class="boc-section-title"><span class="boc-icon">📍</span> W pobliżu</h2>';
+	$html .= '<div class="boc-nearby-grid">';
+	foreach ($items as $it) {
+		$html .= '<a href="' . $it['href'] . '" class="boc-nearby-pill">';
+		$html .= $it['name'];
+		if (!empty($it['dist'])) $html .= ' <span class="boc-dist">· ' . $it['dist'] . '</span>';
+		$html .= '</a>';
+	}
+	$html .= '</div></div>';
+	return $html;
+}
+
+function boc_box_info($items) {
+	$html = '<div class="boc-info-box">';
+	$html .= '<h2 class="boc-section-title"><span class="boc-icon">ℹ️</span> Informacje praktyczne</h2>';
+	$html .= '<table class="boc-info-table"><tbody>';
+	foreach ($items as $it) {
+		$html .= '<tr><td>' . $it['emoji'] . '</td>';
+		$html .= '<td>' . $it['label'] . '</td>';
+		$html .= '<td>' . $it['value'] . '</td></tr>';
+	}
+	$html .= '</tbody></table></div>';
+	return $html;
+}
+
+function boc_back_link($href, $label) {
+	return '<a href="' . $href . '" class="boc-back-link">' . $label . '</a>';
+}
+
+function boc_faq_box($faqs) {
+	$html = '<div class="boc-faq-box">';
+	$html .= '<h2 class="boc-section-title"><span class="boc-icon">❓</span> Często zadawane pytania</h2>';
+	foreach ($faqs as $faq) {
+		$html .= '<details><summary>' . $faq['q'] . '</summary><div><p>' . $faq['a'] . '</p></div></details>';
+	}
+	$html .= '</div>';
+	return $html;
+}
+
+// EN versions (same structure, different title labels)
+function boc_box_attractions_en($items) {
+	$html = '<div class="boc-attractions-box">';
+	$html .= '<h2 class="boc-section-title"><span class="boc-icon">🏛️</span> Top Attractions</h2>';
+	$html .= '<div class="boc-cards-grid">';
+	foreach ($items as $i => $it) {
+		$html .= '<a href="' . $it['href'] . '" class="boc-attraction-card">';
+		$html .= '<div class="boc-attraction-num">' . ($i+1) . '</div>';
+		$html .= '<div><h3>' . $it['title'] . '</h3>';
+		if (!empty($it['desc'])) $html .= '<p>' . $it['desc'] . '</p>';
+		$html .= '</div></a>';
+	}
+	$html .= '</div></div>';
+	return $html;
+}
+
+function boc_box_transport_en($items) {
+	$html = '<div class="boc-transport-box">';
+	$html .= '<h2 class="boc-section-title"><span class="boc-icon">🗺️</span> Getting There</h2>';
+	$html .= '<div class="boc-transport-grid">';
+	foreach ($items as $it) {
+		$html .= '<div class="boc-transport-item">';
+		$html .= '<span class="boc-transport-emoji">' . $it['emoji'] . '</span>';
+		$html .= '<strong>' . $it['label'] . '</strong>';
+		$html .= '<p>' . $it['desc'] . '</p>';
+		$html .= '</div>';
+	}
+	$html .= '</div></div>';
+	return $html;
+}
+
+function boc_box_nearby_en($items) {
+	$html = '<div class="boc-nearby-box">';
+	$html .= '<h2 class="boc-section-title"><span class="boc-icon">📍</span> Nearby</h2>';
+	$html .= '<div class="boc-nearby-grid">';
+	foreach ($items as $it) {
+		$html .= '<a href="' . $it['href'] . '" class="boc-nearby-pill">';
+		$html .= $it['name'];
+		if (!empty($it['dist'])) $html .= ' <span class="boc-dist">· ' . $it['dist'] . '</span>';
+		$html .= '</a>';
+	}
+	$html .= '</div></div>';
+	return $html;
+}
+
+function boc_box_info_en($items) {
+	$html = '<div class="boc-info-box">';
+	$html .= '<h2 class="boc-section-title"><span class="boc-icon">ℹ️</span> Practical Info</h2>';
+	$html .= '<table class="boc-info-table"><tbody>';
+	foreach ($items as $it) {
+		$html .= '<tr><td>' . $it['emoji'] . '</td>';
+		$html .= '<td>' . $it['label'] . '</td>';
+		$html .= '<td>' . $it['value'] . '</td></tr>';
+	}
+	$html .= '</tbody></table></div>';
+	return $html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ENGLISH CONTENT
+// ═══════════════════════════════════════════════════════════════
+
 function boc_run_import() {
 	echo '<pre style="background:#f5f5f5;padding:15px;max-height:500px;overflow:auto">';
 
@@ -138,25 +275,26 @@ function boc_run_import() {
 </ul>');
 
 	// ─── Reggio Calabria + attractions ───
+	$reggio_attractions = boc_box_attractions_en(array(
+		array('href'=>'/destinations/reggio-calabria/bronzi-di-riace/','title'=>'Bronzi di Riace','desc'=>'Two legendary Greek bronze warriors from 450 BC'),
+		array('href'=>'/destinations/reggio-calabria/lungomare/','title'=>'Lungomare Falcomata','desc'=>'"The most beautiful kilometer in Italy"'),
+		array('href'=>'/destinations/reggio-calabria/museo-nazionale/','title'=>'Museo Nazionale','desc'=>'World-class collection of Magna Graecia artifacts'),
+		array('href'=>'/destinations/reggio-calabria/arena-dello-stretto/','title'=>'Arena dello Stretto','desc'=>'Open-air amphitheater with views of Sicily'),
+	));
+	$reggio_transport = boc_box_transport_en(array(
+		array('emoji'=>'✈️','label'=>'By Air','desc'=>'Reggio Calabria Airport (REG) — domestic flights from Rome, Milan'),
+		array('emoji'=>'🚂','label'=>'By Train','desc'=>'High-speed Frecciarossa to Reggio from Rome (~4h) and Milan (~6h)'),
+		array('emoji'=>'⛴️','label'=>'By Ferry','desc'=>'Ferries to Messina, Sicily every 20 minutes from Villa San Giovanni'),
+		array('emoji'=>'🚗','label'=>'By Car','desc'=>'A2 motorway from Naples — approximately 5h drive'),
+	));
+	$reggio_nearby = boc_box_nearby_en(array(
+		array('href'=>'/destinations/scilla/','name'=>'Scilla','dist'=>'20 min'),
+		array('href'=>'/destinations/bova/','name'=>'Bova','dist'=>'45 min'),
+		array('href'=>'/nature/aspromonte/','name'=>'Aspromonte National Park','dist'=>'30 min'),
+		array('href'=>'/destinations/gerace/','name'=>'Gerace','dist'=>'1h'),
+	));
 	$reggio = $p('Reggio Calabria','reggio-calabria','<p>The capital of Calabria\'s metropolitan area sits at the very tip of Italy\'s boot, separated from Sicily by the narrow Strait of Messina. Home to the world-famous Bronzi di Riace and one of the most beautiful waterfronts in Italy.</p>
-
-<h2>Top Attractions</h2>
-<ul>
-<li><a href="/destinations/reggio-calabria/bronzi-di-riace/">Bronzi di Riace</a> — Two legendary Greek bronze warriors</li>
-<li><a href="/destinations/reggio-calabria/lungomare/">Lungomare Falcomata</a> — "The most beautiful kilometer in Italy"</li>
-<li><a href="/destinations/reggio-calabria/museo-nazionale/">Museo Nazionale della Magna Grecia</a></li>
-<li><a href="/destinations/reggio-calabria/arena-dello-stretto/">Arena dello Stretto</a></li>
-</ul>
-
-<h2>Getting There</h2>
-<p>Reggio Calabria has its own airport (REG) with domestic flights. The city is also connected by high-speed trains and the A2 motorway. Ferries to Messina (Sicily) depart every 20 minutes.</p>
-
-<h2>Nearby</h2>
-<ul>
-<li><a href="/destinations/scilla/">Scilla</a> — 20 min drive along the coast</li>
-<li><a href="/destinations/bova/">Bova</a> — 45 min into the Aspromonte mountains</li>
-<li><a href="/nature/aspromonte/">Aspromonte National Park</a> — The wild mountains behind the city</li>
-</ul>', $dest);
+' . $reggio_attractions . $reggio_transport . $reggio_nearby, $dest);
 
 	$p('Bronzi di Riace','bronzi-di-riace','<p>The Bronzi di Riace (Riace Bronzes) are two full-size Greek bronze statues of naked warriors, cast around 450 BC. Discovered by a recreational diver in the Ionian Sea near Riace in 1972, they are considered among the finest examples of ancient Greek sculpture ever found.</p>
 
@@ -164,15 +302,13 @@ function boc_run_import() {
 <p>The statues were likely thrown overboard from a Roman ship, possibly during a storm, while being transported from Greece to Rome. They spent over 2,000 years on the seabed before their accidental discovery.</p>
 
 <h2>What to See</h2>
-<p>The bronzes are displayed in a dedicated climate-controlled room at the Museo Nazionale della Magna Grecia. Standing nearly 2 meters tall, they depict a younger and older warrior with extraordinary anatomical detail.</p>
-
-<h2>Practical Info</h2>
-<p><strong>Location:</strong> Museo Nazionale della Magna Grecia, Piazza De Nava, Reggio Calabria<br>
-<strong>Hours:</strong> Tue-Sun 9:00-20:00 (closed Monday)<br>
-<strong>Tickets:</strong> €8 full, €4 reduced<br>
-<strong>Website:</strong> museoarcheologicoreggiocalabria.it</p>
-
-<p><a href="/destinations/reggio-calabria/">← Back to Reggio Calabria</a></p>', $reggio);
+<p>The bronzes are displayed in a dedicated climate-controlled room at the Museo Nazionale della Magna Grecia. Standing nearly 2 meters tall, they depict a younger and older warrior with extraordinary anatomical detail.
+' . boc_box_info_en(array(
+		array('emoji'=>'📍','label'=>'Location','value'=>'Museo Nazionale della Magna Grecia, Piazza De Nava, Reggio Calabria'),
+		array('emoji'=>'🕐','label'=>'Hours','value'=>'Tue–Sun 9:00–20:00 (closed Monday)'),
+		array('emoji'=>'🎫','label'=>'Tickets','value'=>'€8 full price · €4 reduced'),
+		array('emoji'=>'🌐','label'=>'Website','value'=>'<a href="https://museoarcheologicoreggiocalabria.it" target="_blank">museoarcheologicoreggiocalabria.it</a>'),
+	)) . boc_back_link('/destinations/reggio-calabria/','Back to Reggio Calabria') . '</p>', $reggio);
 
 	$p('Lungomare Falcomata','lungomare','<p>The Lungomare Falcomata is Reggio Calabria\'s stunning seafront promenade, stretching for over a kilometer along the Strait of Messina. The Italian poet Gabriele D\'Annunzio called it "the most beautiful kilometer in Italy" — and it\'s hard to argue.</p>
 
@@ -538,25 +674,26 @@ function boc_run_import_pl() {
 </ul>', $pl);
 
 	// ─── Reggio Calabria + atrakcje ───
+	$reggio_atrakcje = boc_box_attractions(array(
+		array('href'=>'/pl/kierunki/reggio-calabria/bronzy-z-riace/','title'=>'Brązy z Riace','desc'=>'Dwaj legendarni greccy wojownicy z brązu z 450 r. p.n.e.'),
+		array('href'=>'/pl/kierunki/reggio-calabria/lungomare/','title'=>'Lungomare Falcomata','desc'=>'„Najpiękniejszy kilometr we Włoszech"'),
+		array('href'=>'/pl/kierunki/reggio-calabria/museo-nazionale/','title'=>'Museo Nazionale','desc'=>'Światowej klasy zbiory Magna Graecia'),
+		array('href'=>'/pl/kierunki/reggio-calabria/arena-dello-stretto/','title'=>'Arena dello Stretto','desc'=>'Amfiteatr z widokiem na Sycylię'),
+	));
+	$reggio_dojazd = boc_box_transport(array(
+		array('emoji'=>'✈️','label'=>'Samolotem','desc'=>'Lotnisko Reggio Calabria (REG) — loty krajowe z Rzymu i Mediolanu'),
+		array('emoji'=>'🚂','label'=>'Pociągiem','desc'=>'Frecciarossa z Rzymu ok. 4h, z Mediolanu ok. 6h'),
+		array('emoji'=>'⛴️','label'=>'Promem','desc'=>'Promy do Mesyny (Sycylia) co 20 minut z Villa San Giovanni'),
+		array('emoji'=>'🚗','label'=>'Samochodem','desc'=>'Autostrada A2 z Neapolu — ok. 5h jazdy'),
+	));
+	$reggio_poblizu = boc_box_nearby(array(
+		array('href'=>'/pl/kierunki/scilla/','name'=>'Scilla','dist'=>'20 min'),
+		array('href'=>'/pl/kierunki/bova/','name'=>'Bova','dist'=>'45 min'),
+		array('href'=>'/pl/natura/aspromonte/','name'=>'Park Narodowy Aspromonte','dist'=>'30 min'),
+		array('href'=>'/pl/kierunki/gerace/','name'=>'Gerace','dist'=>'1h'),
+	));
 	$reggio = $p('Reggio Calabria','reggio-calabria','<p>Stolica obszaru metropolitalnego Kalabrii leży na samym czubku włoskiego buta, oddzielona od Sycylii wąską Cieśniną Mesyńską. Dom słynnych na cały świat Brązów z Riace i jednego z najpiękniejszych nadmorskich deptaków we Włoszech.</p>
-
-<h2>Główne atrakcje</h2>
-<ul>
-<li><a href="/pl/kierunki/reggio-calabria/bronzy-z-riace/">Brązy z Riace</a> — Dwaj legendarni greccy wojownicy z brązu</li>
-<li><a href="/pl/kierunki/reggio-calabria/lungomare/">Lungomare Falcomata</a> — „Najpiękniejszy kilometr we Włoszech"</li>
-<li><a href="/pl/kierunki/reggio-calabria/museo-nazionale/">Museo Nazionale della Magna Grecia</a></li>
-<li><a href="/pl/kierunki/reggio-calabria/arena-dello-stretto/">Arena dello Stretto</a></li>
-</ul>
-
-<h2>Jak dojechać</h2>
-<p>Reggio Calabria ma własne lotnisko (REG) z lotami krajowymi. Miasto jest również połączone szybkimi pociągami i autostradą A2. Promy do Mesyny (Sycylia) kursują co 20 minut.</p>
-
-<h2>W pobliżu</h2>
-<ul>
-<li><a href="/pl/kierunki/scilla/">Scilla</a> — 20 min jazdy wzdłuż wybrzeża</li>
-<li><a href="/pl/kierunki/bova/">Bova</a> — 45 min w góry Aspromonte</li>
-<li><a href="/pl/natura/aspromonte/">Park Narodowy Aspromonte</a> — Dzikie góry za miastem</li>
-</ul>', $dest);
+' . $reggio_atrakcje . $reggio_dojazd . $reggio_poblizu, $dest);
 
 	$p('Brązy z Riace','bronzy-z-riace','<p>Brązy z Riace to dwa pełnowymiarowe greckie posągi z brązu przedstawiające nagich wojowników, odlane około 450 r. p.n.e. Odkryte przez nurka-amatora w Morzu Jońskim koło Riace w 1972 roku, uważane są za jedne z najwspanialszych przykładów starożytnej rzeźby greckiej.</p>
 
@@ -565,14 +702,12 @@ function boc_run_import_pl() {
 
 <h2>Co zobaczyć</h2>
 <p>Brązy eksponowane są w specjalnym klimatyzowanym pomieszczeniu w Museo Nazionale della Magna Grecia. Mając prawie 2 metry wysokości, przedstawiają młodszego i starszego wojownika z niezwykłym detalem anatomicznym.</p>
-
-<h2>Informacje praktyczne</h2>
-<p><strong>Lokalizacja:</strong> Museo Nazionale della Magna Grecia, Piazza De Nava, Reggio Calabria<br>
-<strong>Godziny:</strong> Wt-Nd 9:00-20:00 (zamknięte w poniedziałki)<br>
-<strong>Bilety:</strong> 8€ normalny, 4€ ulgowy<br>
-<strong>Strona:</strong> museoarcheologicoreggiocalabria.it</p>
-
-<p><a href="/pl/kierunki/reggio-calabria/">← Powrót do Reggio Calabria</a></p>', $reggio);
+' . boc_box_info(array(
+		array('emoji'=>'📍','label'=>'Lokalizacja','value'=>'Museo Nazionale della Magna Grecia, Piazza De Nava, Reggio Calabria'),
+		array('emoji'=>'🕐','label'=>'Godziny','value'=>'Wt–Nd 9:00–20:00 (zamknięte w poniedziałki)'),
+		array('emoji'=>'🎫','label'=>'Bilety','value'=>'8€ normalny · 4€ ulgowy'),
+		array('emoji'=>'🌐','label'=>'Strona','value'=>'<a href="https://museoarcheologicoreggiocalabria.it" target="_blank">museoarcheologicoreggiocalabria.it</a>'),
+	)) . boc_back_link('/pl/kierunki/reggio-calabria/','Powrót do Reggio Calabria'), $reggio);
 
 	$p('Lungomare Falcomata','lungomare','<p>Lungomare Falcomata to oszałamiający nadmorski deptak Reggio Calabria, rozciągający się na ponad kilometr wzdłuż Cieśniny Mesyńskiej. Włoski poeta Gabriele D\'Annunzio nazwał go „najpiękniejszym kilometrem we Włoszech" — i trudno się z tym nie zgodzić.</p>
 

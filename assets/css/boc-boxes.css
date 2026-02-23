@@ -1,0 +1,272 @@
+/* ================================================================
+   BOC PAGE BOXES — wkleić w GeneratePress: Customize > Additional CSS
+   ================================================================ */
+
+/* ── Wspólne ─────────────────────────────────────────── */
+.boc-section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  color: #0F2E42;
+  margin: 0 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #D4A853;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.boc-section-title .boc-icon {
+  font-size: 1.1rem;
+}
+
+/* ── BOX: Główne atrakcje ─────────────────────────────── */
+.boc-attractions-box {
+  background: #fff;
+  border: 1px solid #E8E0D4;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+.boc-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+.boc-attraction-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: #F5F1EB;
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+  text-decoration: none;
+  color: #0F2E42;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  border-left: 3px solid #D4A853;
+}
+.boc-attraction-card:hover {
+  background: #EBF2F7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  color: #1B4D6E;
+  text-decoration: none;
+}
+.boc-attraction-num {
+  background: #1B4D6E;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.boc-attraction-card h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.2rem;
+  font-family: inherit;
+}
+.boc-attraction-card p {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── BOX: Jak dojechać ────────────────────────────────── */
+.boc-transport-box {
+  background: #EBF2F7;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  border-left: 4px solid #1B4D6E;
+}
+.boc-transport-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+.boc-transport-item {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+.boc-transport-emoji {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+.boc-transport-item strong {
+  display: block;
+  font-size: 0.9rem;
+  color: #0F2E42;
+  margin-bottom: 0.3rem;
+}
+.boc-transport-item p {
+  font-size: 0.8rem;
+  color: #555;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── BOX: W pobliżu ───────────────────────────────────── */
+.boc-nearby-box {
+  background: #fff;
+  border: 1px solid #E8E0D4;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+}
+.boc-nearby-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.boc-nearby-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #F5F1EB;
+  border-radius: 50px;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  color: #1B4D6E;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+  border: 1px solid #E8E0D4;
+}
+.boc-nearby-pill:hover {
+  background: #1B4D6E;
+  color: #fff;
+  border-color: #1B4D6E;
+  text-decoration: none;
+}
+.boc-nearby-pill .boc-dist {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  font-weight: 400;
+}
+.boc-nearby-pill::after {
+  content: '→';
+  font-size: 0.85rem;
+}
+
+/* ── BOX: Informacje praktyczne ───────────────────────── */
+.boc-info-box {
+  background: #fff;
+  border: 1px solid #E8E0D4;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+}
+.boc-info-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.boc-info-table tr {
+  border-bottom: 1px solid #F0EBE3;
+}
+.boc-info-table tr:last-child {
+  border-bottom: none;
+}
+.boc-info-table td {
+  padding: 0.65rem 0.5rem;
+  font-size: 0.9rem;
+  vertical-align: top;
+}
+.boc-info-table td:first-child {
+  width: 32px;
+  font-size: 1.1rem;
+  padding-right: 0.75rem;
+}
+.boc-info-table td:nth-child(2) {
+  width: 130px;
+  font-weight: 600;
+  color: #0F2E42;
+}
+.boc-info-table td:last-child {
+  color: #444;
+}
+
+/* ── BOX: Powrót ──────────────────────────────────────── */
+.boc-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #1B4D6E;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  margin: 0.5rem 0 1.5rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid #1B4D6E;
+  border-radius: 50px;
+  transition: background 0.2s, color 0.2s;
+}
+.boc-back-link:hover {
+  background: #1B4D6E;
+  color: #fff;
+  text-decoration: none;
+}
+.boc-back-link::before {
+  content: '←';
+}
+
+/* ── BOX: FAQ (details/summary) ───────────────────────── */
+.boc-faq-box {
+  margin: 2rem 0;
+}
+.boc-faq-box details {
+  background: #fff;
+  border: 1px solid #E8E0D4;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+.boc-faq-box details[open] {
+  border-color: #1B4D6E;
+}
+.boc-faq-box summary {
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #0F2E42;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.boc-faq-box summary::-webkit-details-marker { display: none; }
+.boc-faq-box summary::after {
+  content: '+';
+  font-size: 1.2rem;
+  color: #1B4D6E;
+  font-weight: 300;
+  transition: transform 0.2s;
+}
+.boc-faq-box details[open] summary::after {
+  content: '−';
+}
+.boc-faq-box details > div {
+  padding: 0 1.25rem 1rem;
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.7;
+  border-top: 1px solid #F0EBE3;
+}
+.boc-faq-box details > div p { margin: 0.75rem 0 0; }
+
+/* ── Responsywność ────────────────────────────────────── */
+@media (max-width: 600px) {
+  .boc-cards-grid { grid-template-columns: 1fr; }
+  .boc-transport-grid { grid-template-columns: repeat(2, 1fr); }
+  .boc-attraction-card { flex-direction: row; }
+}
