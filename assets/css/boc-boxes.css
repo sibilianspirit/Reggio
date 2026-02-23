@@ -22,9 +22,8 @@
   padding: 0;
 }
 .boc-cards-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
+  display: flex;
+  flex-direction: column;
   border: 1px solid #E0D8CE;
 }
 .boc-attraction-card {
@@ -35,13 +34,9 @@
   text-decoration: none;
   color: #2A2520;
   border-bottom: 1px solid #E0D8CE;
-  border-right: 1px solid #E0D8CE;
   transition: background 0.15s;
 }
-.boc-cards-grid .boc-attraction-card:nth-child(2n) {
-  border-right: none;
-}
-.boc-cards-grid .boc-attraction-card:nth-last-child(-n+2) {
+.boc-cards-grid .boc-attraction-card:last-child {
   border-bottom: none;
 }
 .boc-attraction-card:hover {
@@ -275,18 +270,6 @@
 
 /* ── Responsive ───────────────────────────────────────── */
 @media (max-width: 768px) {
-  .boc-cards-grid {
-    grid-template-columns: 1fr;
-  }
-  .boc-cards-grid .boc-attraction-card:nth-child(2n) {
-    border-right: none;
-  }
-  .boc-cards-grid .boc-attraction-card {
-    border-right: none;
-  }
-  .boc-cards-grid .boc-attraction-card:last-child {
-    border-bottom: none;
-  }
   .boc-transport-grid {
     grid-template-columns: 1fr 1fr;
   }
