@@ -4,7 +4,7 @@
    ================================================================ */
 
 /* ── WordPress wpautop fix ──────────────────────────────
-   WP auto-inserts <p> and <br> between HTML elements.
+   WP auto-inserts empty p and br tags between elements.
    Hide them inside our custom box containers.
    ─────────────────────────────────────────────────────── */
 .boc-cards-grid > p,
